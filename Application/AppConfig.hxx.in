@@ -1,0 +1,7 @@
+#ifndef APP_CONFIG_HXX
+#define APP_CONFIG_HXX
+
+#define APP_NAME "@PROJECT_NAME@"
+#define APP_VERSION  "@PROJECT_VERSION@"
+
+#endif // APP_CONFIG_HXX
