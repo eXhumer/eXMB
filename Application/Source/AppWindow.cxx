@@ -47,17 +47,16 @@ void AppWindow::setupCentralWidget() {
   m_revokeBtn->setDisabled(true);
   m_tokenLE->setReadOnly(true);
 
-  connect(this->m_redditAuth, &RedditAuthorization::granted, this,
+  connect(m_redditAuth, &RedditAuthorization::granted, this,
           &AppWindow::onGranted);
-  connect(this->m_redditAuth, &RedditAuthorization::grantError, this,
+  connect(m_redditAuth, &RedditAuthorization::grantError, this,
           &AppWindow::onGrantError);
-  connect(this->m_redditAuth, &RedditAuthorization::revoked, this,
+  connect(m_redditAuth, &RedditAuthorization::revoked, this,
           &AppWindow::onRevoked);
-  connect(this->m_redditAuth, &RedditAuthorization::revokeError, this,
+  connect(m_redditAuth, &RedditAuthorization::revokeError, this,
           &AppWindow::onRevokeError);
-  connect(this->m_authBtn, &QPushButton::clicked, this,
-          &AppWindow::onAuthorize);
-  connect(this->m_revokeBtn, &QPushButton::clicked, this, &AppWindow::onRevoke);
+  connect(m_authBtn, &QPushButton::clicked, this, &AppWindow::onAuthorize);
+  connect(m_revokeBtn, &QPushButton::clicked, this, &AppWindow::onRevoke);
 
   centralWidget->setLayout(centralLayout);
   setCentralWidget(centralWidget);

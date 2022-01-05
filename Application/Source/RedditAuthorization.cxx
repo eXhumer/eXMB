@@ -6,9 +6,9 @@
 #include <QUrlQuery>
 
 void RedditAuthorization::onGranted() {
-  this->data()->setExpirationAt(this->m_authFlow->expirationAt());
-  this->data()->setRefreshToken(this->m_authFlow->refreshToken());
-  this->data()->setToken(this->m_authFlow->token());
+  this->data()->setExpirationAt(m_authFlow->expirationAt());
+  this->data()->setRefreshToken(m_authFlow->refreshToken());
+  this->data()->setToken(m_authFlow->token());
   emit this->granted();
 }
 
