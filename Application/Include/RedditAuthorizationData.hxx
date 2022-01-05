@@ -16,6 +16,7 @@ public:
                           QString refreshToken = QString(),
                           QObject *parent = nullptr);
   RedditAuthorizationData(QObject *parent = nullptr);
+  bool expired() const;
   QDateTime expirationAt() const;
   QString refreshToken() const;
   QString token() const;

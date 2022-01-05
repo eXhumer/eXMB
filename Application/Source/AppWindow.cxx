@@ -1,6 +1,5 @@
 #include "AppWindow.hxx"
 #include <QApplication>
-#include <QHBoxLayout>
 #include <QMenuBar>
 #include <QMessageBox>
 #include <QVBoxLayout>
@@ -12,48 +11,30 @@ AppWindow::AppWindow(QWidget *parent) : QMainWindow(parent) {
 
 void AppWindow::setupCentralWidget() {
   m_authBtn = new QPushButton("Authorize");
-  m_authGB = new QGroupBox("Reddit Authorization");
-  m_expAtL = new QLabel("Expiration At:");
-  m_expAtLE = new QLineEdit;
-  m_permanentCB = new QCheckBox("Permanent");
-  m_redditAuth = new RedditAuthorization;
-  m_refreshTokenL = new QLabel("Refresh Token:");
-  m_refreshTokenLE = new QLineEdit;
   m_revokeBtn = new QPushButton("Revoke");
-  m_tokenL = new QLabel("Token:");
-  m_tokenLE = new QLineEdit;
-  QGridLayout *authDataLayout = new QGridLayout;
-  QHBoxLayout *expirationAtLineLayout = new QHBoxLayout;
+  m_authGB = new QGroupBox("Reddit Authorization");
+  m_permanentCB = new QCheckBox("Permanent");
+  m_redditService = new RedditService("bnPnumDqM7YlDueRSzZCDw");
   QVBoxLayout *authLayout = new QVBoxLayout;
   QVBoxLayout *centralLayout = new QVBoxLayout;
   QWidget *centralWidget = new QWidget;
 
-  authDataLayout->addWidget(m_tokenL, 0, 0, Qt::AlignRight);
-  authDataLayout->addWidget(m_tokenLE, 0, 1);
-  authDataLayout->addWidget(m_refreshTokenL, 1, 0, Qt::AlignRight);
-  authDataLayout->addWidget(m_refreshTokenLE, 1, 1);
-  authDataLayout->addWidget(m_expAtL, 2, 0, Qt::AlignRight);
-  authDataLayout->addWidget(m_expAtLE, 2, 1);
   m_authGB->setLayout(authLayout);
-  authLayout->addLayout(authDataLayout);
   authLayout->addWidget(m_permanentCB, 0, Qt::AlignHCenter);
   authLayout->addWidget(m_authBtn);
   authLayout->addWidget(m_revokeBtn);
   centralLayout->addWidget(m_authGB);
   centralLayout->addStretch();
 
-  m_expAtLE->setReadOnly(true);
-  m_refreshTokenLE->setReadOnly(true);
   m_revokeBtn->setDisabled(true);
-  m_tokenLE->setReadOnly(true);
 
-  connect(m_redditAuth, &RedditAuthorization::granted, this,
+  connect(m_redditService, &RedditService::granted, this,
           &AppWindow::onGranted);
-  connect(m_redditAuth, &RedditAuthorization::grantError, this,
+  connect(m_redditService, &RedditService::grantError, this,
           &AppWindow::onGrantError);
-  connect(m_redditAuth, &RedditAuthorization::revoked, this,
+  connect(m_redditService, &RedditService::revoked, this,
           &AppWindow::onRevoked);
-  connect(m_redditAuth, &RedditAuthorization::revokeError, this,
+  connect(m_redditService, &RedditService::revokeError, this,
           &AppWindow::onRevokeError);
   connect(m_authBtn, &QPushButton::clicked, this, &AppWindow::onAuthorize);
   connect(m_revokeBtn, &QPushButton::clicked, this, &AppWindow::onRevoke);
@@ -78,18 +59,10 @@ void AppWindow::setupMenuBar() {
 void AppWindow::onAuthorize() {
   m_authBtn->setDisabled(true);
   m_permanentCB->setDisabled(true);
-  m_redditAuth->grant(m_permanentCB->isChecked());
+  m_redditService->grant(m_permanentCB->isChecked());
 }
 
-void AppWindow::onGranted() {
-  m_tokenLE->setText(m_redditAuth->data()->token());
-  m_refreshTokenLE->setText(m_redditAuth->data()->refreshToken().isEmpty()
-                                ? "No Refresh Token Available!"
-                                : m_redditAuth->data()->refreshToken());
-  m_expAtLE->setText(m_redditAuth->data()->expirationAt().toString(
-      "hh:mm:ss AP t, d MMMM yyyy"));
-  m_revokeBtn->setEnabled(true);
-}
+void AppWindow::onGranted() { m_revokeBtn->setEnabled(true); }
 
 void AppWindow::onGrantError(const QString &error,
                              const QString &errorDescription, const QUrl &uri) {
@@ -107,14 +80,11 @@ void AppWindow::onGrantError(const QString &error,
 
 void AppWindow::onRevoke() {
   m_revokeBtn->setDisabled(true);
-  m_redditAuth->revoke();
+  m_redditService->revoke();
 }
 
 void AppWindow::onRevoked() {
   m_authBtn->setEnabled(true);
-  m_tokenLE->setText(QString());
-  m_refreshTokenLE->setText(QString());
-  m_expAtLE->setText(QString());
   m_permanentCB->setEnabled(true);
 }
 

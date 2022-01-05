@@ -13,6 +13,13 @@ RedditAuthorizationData::RedditAuthorizationData(QDateTime expirationAt,
 RedditAuthorizationData::RedditAuthorizationData(QObject *parent)
     : RedditAuthorizationData(QDateTime(), QString(), QString(), parent) {}
 
+bool RedditAuthorizationData::expired() const {
+  if (m_expirationAt.isValid())
+    return m_expirationAt <= QDateTime::currentDateTime();
+
+  return true;
+}
+
 QDateTime RedditAuthorizationData::expirationAt() const {
   return m_expirationAt;
 }

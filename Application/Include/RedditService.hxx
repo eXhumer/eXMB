@@ -1,39 +1,45 @@
-#ifndef REDDITAUTHORIZATION_HXX
-#define REDDITAUTHORIZATION_HXX
+#ifndef REDDITSERVICE_HXX
+#define REDDITSERVICE_HXX
 
 #include "RedditAuthorizationData.hxx"
+#include <QNetworkAccessManager>
 #include <QNetworkReply>
 #include <QOAuth2AuthorizationCodeFlow>
 #include <QOAuthHttpServerReplyHandler>
 
-class RedditAuthorization : public QObject {
+class RedditService : public QObject {
   Q_OBJECT
 
 private:
-  RedditAuthorizationData *m_data;
+  RedditAuthorizationData *m_authData;
+  QNetworkAccessManager *m_nam;
   QOAuthHttpServerReplyHandler *m_replyHandler;
   QOAuth2AuthorizationCodeFlow *m_authFlow;
 
+public:
+  RedditService(QString clientId, QString token, QDateTime expAt,
+                QString refreshToken = QString(),
+                QNetworkAccessManager *nam = nullptr,
+                QObject *parent = nullptr);
+  RedditService(QString clientId, QNetworkAccessManager *nam = nullptr,
+                QObject *parent = nullptr);
+
 private slots:
   void onGranted();
-
-public:
-  RedditAuthorization(QObject *parent = nullptr);
-  QString clientIdentifier() const;
-  RedditAuthorizationData *data() const;
+  void onTokenExpiry();
 
 public slots:
   void grant(bool permanent);
   void revoke();
-  void setNetworkAccessManager(QNetworkAccessManager *nam);
 
 signals:
   void granted();
   void grantError(const QString &error, const QString &errorDescription,
                   const QUrl &uri);
+  void grantExpired();
   void revoked();
   void revokeError(const QNetworkReply::NetworkError &error,
                    const QString &errorString);
 };
 
-#endif // REDDITAUTHORIZATION_HXX
+#endif // REDDITSERVICE_HXX
