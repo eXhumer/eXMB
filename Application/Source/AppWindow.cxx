@@ -1,4 +1,5 @@
 #include "AppWindow.hxx"
+#include "eXRC/Reddit.hxx"
 #include <QApplication>
 #include <QMenuBar>
 #include <QMessageBox>
@@ -14,7 +15,7 @@ void AppWindow::setupCentralWidget() {
   m_revokeBtn = new QPushButton("Revoke");
   m_authGB = new QGroupBox("Reddit Authorization");
   m_permanentCB = new QCheckBox("Permanent");
-  m_redditService = new RedditService("bnPnumDqM7YlDueRSzZCDw");
+  m_redditService = new eXRC::Service::Reddit("bnPnumDqM7YlDueRSzZCDw");
   QVBoxLayout *authLayout = new QVBoxLayout;
   QVBoxLayout *centralLayout = new QVBoxLayout;
   QWidget *centralWidget = new QWidget;
@@ -28,13 +29,13 @@ void AppWindow::setupCentralWidget() {
 
   m_revokeBtn->setDisabled(true);
 
-  connect(m_redditService, &RedditService::granted, this,
+  connect(m_redditService, &eXRC::Service::Reddit::granted, this,
           &AppWindow::onGranted);
-  connect(m_redditService, &RedditService::grantError, this,
+  connect(m_redditService, &eXRC::Service::Reddit::grantError, this,
           &AppWindow::onGrantError);
-  connect(m_redditService, &RedditService::revoked, this,
+  connect(m_redditService, &eXRC::Service::Reddit::revoked, this,
           &AppWindow::onRevoked);
-  connect(m_redditService, &RedditService::revokeError, this,
+  connect(m_redditService, &eXRC::Service::Reddit::revokeError, this,
           &AppWindow::onRevokeError);
   connect(m_authBtn, &QPushButton::clicked, this, &AppWindow::onAuthorize);
   connect(m_revokeBtn, &QPushButton::clicked, this, &AppWindow::onRevoke);

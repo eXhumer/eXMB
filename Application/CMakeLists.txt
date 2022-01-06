@@ -4,15 +4,12 @@ find_package(Qt6 COMPONENTS Network NetworkAuth Widgets REQUIRED)
 qt_wrap_cpp(
 APP_MOC
     Include/AppWindow.hxx
-    Include/RedditService.hxx
 )
 
 add_executable(
 ${PROJECT_NAME}
     ${APP_MOC}
     Source/AppWindow.cxx
-    Source/RedditAuthorizationData.cxx
-    Source/RedditService.cxx
     Source/Main.cxx
 )
 
@@ -38,5 +35,6 @@ ${PROJECT_NAME}
         Qt6::Widgets
 
     PRIVATE
+        eXRC
         eXVHP
 )

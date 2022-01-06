@@ -1,17 +1,21 @@
 #ifndef APPWINDOW_HXX
 #define APPWINDOW_HXX
 
-#include "RedditService.hxx"
+namespace eXRC::Service {
+class Reddit;
+} // namespace eXRC::Service
+
 #include <QCheckBox>
 #include <QGroupBox>
 #include <QMainWindow>
+#include <QNetworkReply>
 #include <QPushButton>
 
 class AppWindow : public QMainWindow {
   Q_OBJECT
 
 private:
-  RedditService *m_redditService;
+  eXRC::Service::Reddit *m_redditService;
   QCheckBox *m_permanentCB;
   QGroupBox *m_authGB;
   QPushButton *m_authBtn, *m_revokeBtn;

@@ -1,3 +1,6 @@
 [submodule "Library/eXVHP"]
 	path = Library/eXVHP
 	url = https://github.com/eXhumer/eXVHP.git
+[submodule "Library/eXRC"]
+	path = Library/eXRC
+	url = git@github.com:eXhumer/eXRC.git
