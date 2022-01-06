@@ -1,0 +1,3 @@
+[submodule "Library/eXVHP"]
+	path = Library/eXVHP
+	url = https://github.com/eXhumer/eXVHP.git
