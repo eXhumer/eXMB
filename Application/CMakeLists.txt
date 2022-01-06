@@ -36,4 +36,7 @@ ${PROJECT_NAME}
     PUBLIC
         Qt6::NetworkAuth
         Qt6::Widgets
+
+    PRIVATE
+        eXVHP
 )
