@@ -54,8 +54,7 @@ private slots:
                     const QUrl &uri);
   void onRevoke();
   void onRevoked();
-  void onRevokeError(const QNetworkReply::NetworkError &error,
-                     const QString &errorString);
+  void onRevokeError(const QString &error);
   void onVideoFileSelectAndUpload();
 };
 

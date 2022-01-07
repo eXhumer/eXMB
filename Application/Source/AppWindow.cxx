@@ -176,8 +176,7 @@ void AppWindow::onRevoked() {
   m_swoRB->setDisabled(true);
 }
 
-void AppWindow::onRevokeError(const QNetworkReply::NetworkError &error,
-                              const QString &errorString) {
+void AppWindow::onRevokeError(const QString &errorString) {
   m_revokeBtn->setEnabled(true);
   QMessageBox::warning(this, "Error occurred while revoking token",
                        errorString);
