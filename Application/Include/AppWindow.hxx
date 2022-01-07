@@ -15,6 +15,7 @@ class Streamwo;
 } // namespace eXVHP::Service
 
 #include <QCheckBox>
+#include <QDir>
 #include <QGroupBox>
 #include <QLineEdit>
 #include <QMainWindow>
@@ -27,6 +28,7 @@ class AppWindow : public QMainWindow {
   Q_OBJECT
 
 private:
+  QDir m_appDataDir;
   eXRC::Service::Reddit *m_red;
   eXVHP::Service::JustStreamLive *m_jsl;
   eXVHP::Service::Mixture *m_mix;
@@ -43,6 +45,8 @@ private:
       *m_swoRB;
   void setupCentralWidget();
   void setupMenuBar();
+  void setupServices();
+  void setupWidgets();
 
 public:
   AppWindow(QWidget *parent = nullptr);

@@ -8,43 +8,25 @@
 #include "eXVHP/Streamwo.hxx"
 #include <QApplication>
 #include <QFileDialog>
+#include <QJsonDocument>
+#include <QJsonObject>
 #include <QLabel>
 #include <QLineEdit>
 #include <QMenuBar>
 #include <QMessageBox>
+#include <QStandardPaths>
 #include <QVBoxLayout>
 
-AppWindow::AppWindow(QWidget *parent) : QMainWindow(parent) {
-  // Setup services
-  QNetworkAccessManager *nam = new QNetworkAccessManager;
-  m_jsl = new eXVHP::Service::JustStreamLive(nam);
-  m_mix = new eXVHP::Service::Mixture(nam);
-  m_sab = new eXVHP::Service::Streamable(nam);
-  m_sff = new eXVHP::Service::Streamff(nam);
-  m_sja = new eXVHP::Service::Streamja(nam);
-  m_swo = new eXVHP::Service::Streamwo(nam);
-  m_red = new eXRC::Service::Reddit("bnPnumDqM7YlDueRSzZCDw", nam);
+AppWindow::AppWindow(QWidget *parent)
+    : QMainWindow(parent), m_appDataDir(QStandardPaths::writableLocation(
+                               QStandardPaths::AppDataLocation)) {
+  if (!m_appDataDir.exists())
+    m_appDataDir.mkpath(".");
 
-  m_permanentCB = new QCheckBox("Permanent");
-  m_authGB = new QGroupBox("Reddit Authorization");
-  m_postGB = new QGroupBox("Post Video");
-  m_subredditLE = new QLineEdit;
-  m_titleLE = new QLineEdit;
-  m_flairLE = new QLineEdit;
-  m_uploadProgress = new QProgressBar;
-  m_authBtn = new QPushButton("Authorize");
-  m_revokeBtn = new QPushButton("Revoke");
-  m_videoSelectBtn = new QPushButton("Select Video File and Upload");
-  m_jslRB = new QRadioButton("JustStreamLive");
-  m_mixRB = new QRadioButton("Mixture");
-  m_redRB = new QRadioButton("Reddit");
-  m_sabRB = new QRadioButton("Streamable");
-  m_sffRB = new QRadioButton("Streamff");
-  m_sjaRB = new QRadioButton("Streamja");
-  m_swoRB = new QRadioButton("Streamwo");
-
-  this->setupCentralWidget();
-  this->setupMenuBar();
+  setupWidgets();
+  setupServices();
+  setupCentralWidget();
+  setupMenuBar();
 }
 
 void AppWindow::setupCentralWidget() {
@@ -81,8 +63,6 @@ void AppWindow::setupCentralWidget() {
   m_authGB->setLayout(authLayout);
   m_postGB->setLayout(postLayout);
 
-  onRevoked();
-
   connect(m_red, &eXRC::Service::Reddit::granted, this, &AppWindow::onGranted);
   connect(m_red, &eXRC::Service::Reddit::grantError, this,
           &AppWindow::onGrantError);
@@ -114,6 +94,64 @@ void AppWindow::setupMenuBar() {
   setMenuBar(menuBar);
 }
 
+void AppWindow::setupServices() {
+  QNetworkAccessManager *nam = new QNetworkAccessManager;
+  m_jsl = new eXVHP::Service::JustStreamLive(nam);
+  m_mix = new eXVHP::Service::Mixture(nam);
+  m_sab = new eXVHP::Service::Streamable(nam);
+  m_sff = new eXVHP::Service::Streamff(nam);
+  m_sja = new eXVHP::Service::Streamja(nam);
+  m_swo = new eXVHP::Service::Streamwo(nam);
+
+  QString redditClientId = "bnPnumDqM7YlDueRSzZCDw";
+
+  QFile credentialFile(m_appDataDir.filePath("credential.json"));
+  if (credentialFile.exists()) {
+    credentialFile.open(QIODevice::ReadOnly);
+    QJsonObject credentialData =
+        QJsonDocument::fromJson(credentialFile.readAll()).object();
+    QString accessToken = credentialData["access_token"].toString();
+    QString refreshToken = credentialData["refresh_token"].toString();
+    QDateTime expAt =
+        QDateTime::fromSecsSinceEpoch(credentialData["expiry_at"].toInt());
+
+    if (QDateTime::currentDateTime() < expAt || !refreshToken.isEmpty()) {
+      m_red = new eXRC::Service::Reddit(redditClientId, nam, accessToken, expAt,
+                                        refreshToken.isEmpty() ? QString()
+                                                               : refreshToken);
+      onGranted();
+
+      if (!refreshToken.isEmpty())
+        m_permanentCB->setChecked(true);
+
+      return;
+    }
+  }
+
+  m_red = new eXRC::Service::Reddit(redditClientId, nam);
+  onRevoked();
+}
+
+void AppWindow::setupWidgets() {
+  m_permanentCB = new QCheckBox("Permanent");
+  m_authGB = new QGroupBox("Reddit Authorization");
+  m_postGB = new QGroupBox("Post Video");
+  m_subredditLE = new QLineEdit;
+  m_titleLE = new QLineEdit;
+  m_flairLE = new QLineEdit;
+  m_uploadProgress = new QProgressBar;
+  m_authBtn = new QPushButton("Authorize");
+  m_revokeBtn = new QPushButton("Revoke");
+  m_videoSelectBtn = new QPushButton("Select Video File and Upload");
+  m_jslRB = new QRadioButton("JustStreamLive");
+  m_mixRB = new QRadioButton("Mixture");
+  m_redRB = new QRadioButton("Reddit");
+  m_sabRB = new QRadioButton("Streamable");
+  m_sffRB = new QRadioButton("Streamff");
+  m_sjaRB = new QRadioButton("Streamja");
+  m_swoRB = new QRadioButton("Streamwo");
+}
+
 void AppWindow::onAuthorize() {
   m_authBtn->setDisabled(true);
   m_permanentCB->setDisabled(true);
@@ -121,6 +159,14 @@ void AppWindow::onAuthorize() {
 }
 
 void AppWindow::onGranted() {
+  QFile credentialFile(m_appDataDir.filePath("credential.json"));
+  credentialFile.open(QIODevice::WriteOnly);
+  QJsonObject credentialData;
+  credentialData["access_token"] = m_red->token();
+  credentialData["refresh_token"] = m_red->refreshToken();
+  credentialData["expiry_at"] = m_red->expirationAt().toSecsSinceEpoch();
+  credentialFile.write(
+      QJsonDocument(credentialData).toJson(QJsonDocument::Compact));
   m_authBtn->setDisabled(true);
   m_revokeBtn->setEnabled(true);
   m_videoSelectBtn->setEnabled(true);
@@ -157,6 +203,7 @@ void AppWindow::onRevoke() {
 }
 
 void AppWindow::onRevoked() {
+  QFile::remove(m_appDataDir.filePath("credential.json"));
   m_authBtn->setEnabled(true);
   m_revokeBtn->setDisabled(true);
   m_videoSelectBtn->setDisabled(true);
