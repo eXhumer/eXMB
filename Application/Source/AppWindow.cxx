@@ -45,7 +45,6 @@ void AppWindow::setupCentralWidget() {
   postHostLayout->addWidget(new QLabel("Video Host"), 0, Qt::AlignHCenter);
   postHostLayout->addWidget(m_jslRB);
   postHostLayout->addWidget(m_mixRB);
-  postHostLayout->addWidget(m_redRB);
   postHostLayout->addWidget(m_sabRB);
   postHostLayout->addWidget(m_sffRB);
   postHostLayout->addWidget(m_sjaRB);
@@ -145,7 +144,6 @@ void AppWindow::setupWidgets() {
   m_videoSelectBtn = new QPushButton("Select Video File and Upload");
   m_jslRB = new QRadioButton("JustStreamLive");
   m_mixRB = new QRadioButton("Mixture");
-  m_redRB = new QRadioButton("Reddit");
   m_sabRB = new QRadioButton("Streamable");
   m_sffRB = new QRadioButton("Streamff");
   m_sjaRB = new QRadioButton("Streamja");
@@ -176,7 +174,6 @@ void AppWindow::onGranted() {
   m_titleLE->setEnabled(true);
   m_jslRB->setEnabled(true);
   m_mixRB->setEnabled(true);
-  m_redRB->setEnabled(true);
   m_sabRB->setEnabled(true);
   m_sffRB->setEnabled(true);
   m_sjaRB->setEnabled(true);
@@ -216,7 +213,6 @@ void AppWindow::onRevoked() {
   m_titleLE->setDisabled(true);
   m_jslRB->setDisabled(true);
   m_mixRB->setDisabled(true);
-  m_redRB->setDisabled(true);
   m_sabRB->setDisabled(true);
   m_sffRB->setDisabled(true);
   m_sjaRB->setDisabled(true);
