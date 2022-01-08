@@ -62,7 +62,7 @@ void AppWindow::setupCentralWidget() {
   m_authGB->setLayout(authLayout);
   m_postGB->setLayout(postLayout);
 
-  connect(m_red, &eXRC::Service::Reddit::granted, this, &AppWindow::onGranted);
+  connect(m_red, &eXRC::Service::Reddit::ready, this, &AppWindow::onReady);
   connect(m_red, &eXRC::Service::Reddit::grantError, this,
           &AppWindow::onGrantError);
   connect(m_red, &eXRC::Service::Reddit::revoked, this, &AppWindow::onRevoked);
@@ -118,7 +118,6 @@ void AppWindow::setupServices() {
       m_red = new eXRC::Service::Reddit(redditClientId, nam, accessToken, expAt,
                                         refreshToken.isEmpty() ? QString()
                                                                : refreshToken);
-      onGranted();
 
       if (!refreshToken.isEmpty())
         m_permanentCB->setChecked(true);
@@ -156,7 +155,7 @@ void AppWindow::onAuthorize() {
   m_red->grant(m_permanentCB->isChecked());
 }
 
-void AppWindow::onGranted() {
+void AppWindow::onReady(const QJsonObject &identity) {
   QFile credentialFile(m_appDataDir.filePath("credential.json"));
   credentialFile.open(QIODevice::WriteOnly);
   QJsonObject credentialData;
@@ -178,10 +177,12 @@ void AppWindow::onGranted() {
   m_sffRB->setEnabled(true);
   m_sjaRB->setEnabled(true);
   m_swoRB->setEnabled(true);
+
+  QMessageBox::information(this, "Logged in!",
+                           "Logged in as " + identity["name"].toString() + "!");
 }
 
-void AppWindow::onGrantError(const QString &error,
-                             const QString &errorDescription, const QUrl &uri) {
+void AppWindow::onGrantError(const QString &error) {
   m_authBtn->setEnabled(true);
 
   if (error == "access_denied")
@@ -278,6 +279,8 @@ void AppWindow::onVideoFileSelectAndUpload() {
             [this, videoFile](QFile *vidFile, const QString &linkId,
                               const QString &videoLink) {
               if (videoFile == vidFile) {
+                m_red->postUrl(videoLink, m_titleLE->text(),
+                               m_subredditLE->text(), m_flairLE->text());
                 QMessageBox::information(this, "JustStreamLive Upload Success",
                                          videoLink);
               }

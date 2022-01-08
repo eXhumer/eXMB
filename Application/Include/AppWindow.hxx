@@ -52,9 +52,8 @@ public:
 
 private slots:
   void onAuthorize();
-  void onGranted();
-  void onGrantError(const QString &error, const QString &errorDescription,
-                    const QUrl &uri);
+  void onReady(const QJsonObject &identity);
+  void onGrantError(const QString &error);
   void onRevoke();
   void onRevoked();
   void onRevokeError(const QString &error);
