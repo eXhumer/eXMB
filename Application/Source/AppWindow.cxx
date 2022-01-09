@@ -94,6 +94,7 @@ void AppWindow::setupMenuBar() {
 }
 
 void AppWindow::setupServices() {
+  disableWidgets();
   QNetworkAccessManager *nam = new QNetworkAccessManager;
   m_jsl = new eXVHP::Service::JustStreamLive(nam);
   m_mix = new eXVHP::Service::Mixture(nam);
@@ -122,11 +123,16 @@ void AppWindow::setupServices() {
       if (!refreshToken.isEmpty())
         m_permanentCB->setChecked(true);
 
+      enableWidgets();
+      m_revokeBtn->setDisabled(true);
+      m_permanentCB->setDisabled(true);
       return;
     }
   }
 
   m_red = new eXRC::Service::Reddit(redditClientId, nam);
+  m_authBtn->setEnabled(true);
+  m_permanentCB->setEnabled(true);
   onRevoked();
 }
 
@@ -149,6 +155,41 @@ void AppWindow::setupWidgets() {
   m_swoRB = new QRadioButton("Streamwo");
 }
 
+void AppWindow::enableWidgets() {
+  m_permanentCB->setEnabled(true);
+  m_subredditLE->setEnabled(true);
+  m_titleLE->setEnabled(true);
+  m_flairLE->setEnabled(true);
+  m_authBtn->setEnabled(true);
+  m_revokeBtn->setEnabled(true);
+  m_videoSelectBtn->setEnabled(true);
+  m_jslRB->setEnabled(true);
+  m_mixRB->setEnabled(true);
+  m_sabRB->setEnabled(true);
+  m_sffRB->setEnabled(true);
+  m_sjaRB->setEnabled(true);
+  m_swoRB->setEnabled(true);
+}
+
+void AppWindow::disableWidgets() {
+  m_permanentCB->setDisabled(true);
+  m_subredditLE->setText(QString());
+  m_subredditLE->setDisabled(true);
+  m_titleLE->setText(QString());
+  m_titleLE->setDisabled(true);
+  m_flairLE->setText(QString());
+  m_flairLE->setDisabled(true);
+  m_authBtn->setDisabled(true);
+  m_revokeBtn->setDisabled(true);
+  m_videoSelectBtn->setDisabled(true);
+  m_jslRB->setDisabled(true);
+  m_mixRB->setDisabled(true);
+  m_sabRB->setDisabled(true);
+  m_sffRB->setDisabled(true);
+  m_sjaRB->setDisabled(true);
+  m_swoRB->setDisabled(true);
+}
+
 void AppWindow::onAuthorize() {
   m_authBtn->setDisabled(true);
   m_permanentCB->setDisabled(true);
@@ -164,19 +205,9 @@ void AppWindow::onReady(const QJsonObject &identity) {
   credentialData["expiry_at"] = m_red->expirationAt().toSecsSinceEpoch();
   credentialFile.write(
       QJsonDocument(credentialData).toJson(QJsonDocument::Compact));
+  enableWidgets();
   m_authBtn->setDisabled(true);
-  m_revokeBtn->setEnabled(true);
-  m_videoSelectBtn->setEnabled(true);
   m_permanentCB->setDisabled(true);
-  m_flairLE->setEnabled(true);
-  m_subredditLE->setEnabled(true);
-  m_titleLE->setEnabled(true);
-  m_jslRB->setEnabled(true);
-  m_mixRB->setEnabled(true);
-  m_sabRB->setEnabled(true);
-  m_sffRB->setEnabled(true);
-  m_sjaRB->setEnabled(true);
-  m_swoRB->setEnabled(true);
 
   QMessageBox::information(this, "Logged in!",
                            "Logged in as " + identity["name"].toString() + "!");
@@ -202,22 +233,9 @@ void AppWindow::onRevoke() {
 
 void AppWindow::onRevoked() {
   QFile::remove(m_appDataDir.filePath("credential.json"));
+  disableWidgets();
   m_authBtn->setEnabled(true);
-  m_revokeBtn->setDisabled(true);
-  m_videoSelectBtn->setDisabled(true);
   m_permanentCB->setEnabled(true);
-  m_flairLE->setText(QString());
-  m_flairLE->setDisabled(true);
-  m_subredditLE->setText(QString());
-  m_subredditLE->setDisabled(true);
-  m_titleLE->setText(QString());
-  m_titleLE->setDisabled(true);
-  m_jslRB->setDisabled(true);
-  m_mixRB->setDisabled(true);
-  m_sabRB->setDisabled(true);
-  m_sffRB->setDisabled(true);
-  m_sjaRB->setDisabled(true);
-  m_swoRB->setDisabled(true);
 }
 
 void AppWindow::onRevokeError(const QString &errorString) {

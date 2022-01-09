@@ -51,6 +51,8 @@ public:
   AppWindow(QWidget *parent = nullptr);
 
 private slots:
+  void enableWidgets();
+  void disableWidgets();
   void onAuthorize();
   void onReady(const QJsonObject &identity);
   void onGrantError(const QString &error);
