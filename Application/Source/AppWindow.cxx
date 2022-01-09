@@ -68,6 +68,8 @@ void AppWindow::setupCentralWidget() {
   connect(m_red, &eXRC::Service::Reddit::ready, this, &AppWindow::onReady);
   connect(m_red, &eXRC::Service::Reddit::grantError, this,
           &AppWindow::onGrantError);
+  connect(m_red, &eXRC::Service::Reddit::grantExpired, this,
+          &AppWindow::onRevoked);
   connect(m_red, &eXRC::Service::Reddit::revoked, this, &AppWindow::onRevoked);
   connect(m_red, &eXRC::Service::Reddit::revokeError, this,
           &AppWindow::onRevokeError);
