@@ -284,173 +284,351 @@ void AppWindow::onVideoFileSelectAndUpload() {
 
   if (m_jslRB->isChecked()) {
     QProgressBar *uploadProgress = m_uploadProgress;
-    connect(m_jsl, &eXVHP::Service::JustStreamLive::videoUploadProgress, this,
-            [uploadProgress, videoFile](QFile *vidFile, qint64 bytesSent,
-                                        qint64 bytesTotal) {
-              if (videoFile == vidFile) {
-                uploadProgress->setValue(bytesSent);
-                uploadProgress->setMaximum(bytesTotal);
-              }
-            });
+    connect(
+        m_jsl, &eXVHP::Service::JustStreamLive::videoUploadProgress, this,
+        [uploadProgress, videoFile](QFile *vidFile, qint64 bytesSent,
+                                    qint64 bytesTotal) {
+          if (videoFile == vidFile) {
+            uploadProgress->setValue(bytesSent);
+            uploadProgress->setMaximum(bytesTotal);
+          }
+        },
+        Qt::UniqueConnection);
 
-    connect(m_jsl, &eXVHP::Service::JustStreamLive::videoUploaded, this,
-            [this, videoFile](QFile *vidFile, const QString &linkId,
-                              const QString &videoLink) {
-              if (videoFile == vidFile) {
-                m_red->postUrl(videoLink, m_titleLE->text(),
-                               m_subredditLE->text(), m_flairLE->text());
-                QMessageBox::information(this, "JustStreamLive Upload Success",
-                                         videoLink);
-              }
-            });
+    connect(
+        m_jsl, &eXVHP::Service::JustStreamLive::videoUploaded, this,
+        [this, videoFile](QFile *vidFile, const QString &linkId,
+                          const QString &videoLink) {
+          if (videoFile == vidFile) {
+            connect(
+                m_red, &eXRC::Service::Reddit::postedUrl, this,
+                [this, videoLink](const QString &postUrl,
+                                  const QString &redditUrl) {
+                  if (postUrl == videoLink) {
+                    QMessageBox::information(this, "Video Posted Successfully!",
+                                             "Posted <a href=\"" + postUrl +
+                                                 "\">Video</a> to <a href=\"" +
+                                                 redditUrl + "\">Reddit</a>!");
+                  }
+                },
+                Qt::UniqueConnection);
+            connect(
+                m_red, &eXRC::Service::Reddit::postUrlError, this,
+                [this, videoLink](const QString &postUrl,
+                                  const QString &error) {
+                  if (postUrl == videoLink) {
+                    QMessageBox::warning(
+                        this, "Video Posted Error!",
+                        "Error while posting video link to Reddit!\n" + error);
+                  }
+                },
+                Qt::UniqueConnection);
 
-    connect(m_jsl, &eXVHP::Service::JustStreamLive::videoUploadError, this,
-            [this, videoFile](QFile *vidFile, const QString &error) {
-              if (videoFile == vidFile) {
-                QMessageBox::warning(this, "JustStreamLive Upload Error",
-                                     error);
-              }
-            });
+            m_red->postUrl(videoLink, m_titleLE->text(), m_subredditLE->text(),
+                           m_flairLE->text());
+          }
+        },
+        Qt::UniqueConnection);
+
+    connect(
+        m_jsl, &eXVHP::Service::JustStreamLive::videoUploadError, this,
+        [this, videoFile](QFile *vidFile, const QString &error) {
+          if (videoFile == vidFile) {
+            QMessageBox::warning(this, "JustStreamLive Upload Error", error);
+          }
+        },
+        Qt::UniqueConnection);
 
     m_jsl->uploadVideo(videoFile);
   } else if (m_mixRB->isChecked()) {
     QProgressBar *uploadProgress = m_uploadProgress;
-    connect(m_mix, &eXVHP::Service::Mixture::videoUploadProgress, this,
-            [uploadProgress, videoFile](QFile *vidFile, qint64 bytesSent,
-                                        qint64 bytesTotal) {
-              if (videoFile == vidFile) {
-                uploadProgress->setValue(bytesSent);
-                uploadProgress->setMaximum(bytesTotal);
-              }
-            });
+    connect(
+        m_mix, &eXVHP::Service::Mixture::videoUploadProgress, this,
+        [uploadProgress, videoFile](QFile *vidFile, qint64 bytesSent,
+                                    qint64 bytesTotal) {
+          if (videoFile == vidFile) {
+            uploadProgress->setValue(bytesSent);
+            uploadProgress->setMaximum(bytesTotal);
+          }
+        },
+        Qt::UniqueConnection);
 
-    connect(m_mix, &eXVHP::Service::Mixture::videoUploaded, this,
-            [this, videoFile](QFile *vidFile, const QString &linkId,
-                              const QString &videoLink) {
-              if (videoFile == vidFile) {
-                QMessageBox::information(this, "Video Uploaded", videoLink);
-              }
-            });
+    connect(
+        m_mix, &eXVHP::Service::Mixture::videoUploaded, this,
+        [this, videoFile](QFile *vidFile, const QString &linkId,
+                          const QString &videoLink) {
+          if (videoFile == vidFile) {
+            connect(
+                m_red, &eXRC::Service::Reddit::postedUrl, this,
+                [this, videoLink](const QString &postUrl,
+                                  const QString &redditUrl) {
+                  if (postUrl == videoLink) {
+                    QMessageBox::information(this, "Video Posted Successfully!",
+                                             "Posted <a href=\"" + postUrl +
+                                                 "\">Video</a> to <a href=\"" +
+                                                 redditUrl + "\">Reddit</a>!");
+                  }
+                },
+                Qt::UniqueConnection);
+            connect(
+                m_red, &eXRC::Service::Reddit::postUrlError, this,
+                [this, videoLink](const QString &postUrl,
+                                  const QString &error) {
+                  if (postUrl == videoLink) {
+                    QMessageBox::warning(
+                        this, "Video Posted Error!",
+                        "Error while posting video link to Reddit!\n" + error);
+                  }
+                },
+                Qt::UniqueConnection);
 
-    connect(m_mix, &eXVHP::Service::Mixture::videoUploadError, this,
-            [this, videoFile](QFile *vidFile, const QString &error) {
-              if (videoFile == vidFile) {
-                QMessageBox::warning(this, "Mixture Video Upload Error", error);
-              }
-            });
+            m_red->postUrl(videoLink, m_titleLE->text(), m_subredditLE->text(),
+                           m_flairLE->text());
+          }
+        },
+        Qt::UniqueConnection);
+
+    connect(
+        m_mix, &eXVHP::Service::Mixture::videoUploadError, this,
+        [this, videoFile](QFile *vidFile, const QString &error) {
+          if (videoFile == vidFile) {
+            QMessageBox::warning(this, "Mixture Video Upload Error", error);
+          }
+        },
+        Qt::UniqueConnection);
 
     m_mix->uploadVideo(videoFile);
   } else if (m_sabRB->isChecked()) {
     QProgressBar *uploadProgress = m_uploadProgress;
-    connect(m_sab, &eXVHP::Service::Streamable::videoUploadProgress, this,
-            [uploadProgress, videoFile](QFile *vidFile, qint64 bytesSent,
-                                        qint64 bytesTotal) {
-              if (videoFile == vidFile) {
-                uploadProgress->setValue(bytesSent);
-                uploadProgress->setMaximum(bytesTotal);
-              }
-            });
+    connect(
+        m_sab, &eXVHP::Service::Streamable::videoUploadProgress, this,
+        [uploadProgress, videoFile](QFile *vidFile, qint64 bytesSent,
+                                    qint64 bytesTotal) {
+          if (videoFile == vidFile) {
+            uploadProgress->setValue(bytesSent);
+            uploadProgress->setMaximum(bytesTotal);
+          }
+        },
+        Qt::UniqueConnection);
 
-    connect(m_sab, &eXVHP::Service::Streamable::videoUploaded, this,
-            [this, videoFile](QFile *vidFile, const QString &linkId,
-                              const QString &videoLink) {
-              if (videoFile == vidFile) {
-                QMessageBox::information(this, "Video Uploaded", videoLink);
-              }
-            });
+    connect(
+        m_sab, &eXVHP::Service::Streamable::videoUploaded, this,
+        [this, videoFile](QFile *vidFile, const QString &linkId,
+                          const QString &videoLink) {
+          if (videoFile == vidFile) {
+            connect(
+                m_red, &eXRC::Service::Reddit::postedUrl, this,
+                [this, videoLink](const QString &postUrl,
+                                  const QString &redditUrl) {
+                  if (postUrl == videoLink) {
+                    QMessageBox::information(this, "Video Posted Successfully!",
+                                             "Posted <a href=\"" + postUrl +
+                                                 "\">Video</a> to <a href=\"" +
+                                                 redditUrl + "\">Reddit</a>!");
+                  }
+                },
+                Qt::UniqueConnection);
+            connect(
+                m_red, &eXRC::Service::Reddit::postUrlError, this,
+                [this, videoLink](const QString &postUrl,
+                                  const QString &error) {
+                  if (postUrl == videoLink) {
+                    QMessageBox::warning(
+                        this, "Video Posted Error!",
+                        "Error while posting video link to Reddit!\n" + error);
+                  }
+                },
+                Qt::UniqueConnection);
 
-    connect(m_sab, &eXVHP::Service::Streamable::videoUploadError, this,
-            [this, videoFile](QFile *vidFile, const QString &error) {
-              if (videoFile == vidFile) {
-                QMessageBox::warning(this, "Streamable Video Upload Error",
-                                     error);
-              }
-            });
+            m_red->postUrl(videoLink, m_titleLE->text(), m_subredditLE->text(),
+                           m_flairLE->text());
+          }
+        },
+        Qt::UniqueConnection);
+
+    connect(
+        m_sab, &eXVHP::Service::Streamable::videoUploadError, this,
+        [this, videoFile](QFile *vidFile, const QString &error) {
+          if (videoFile == vidFile) {
+            QMessageBox::warning(this, "Streamable Video Upload Error", error);
+          }
+        },
+        Qt::UniqueConnection);
 
     m_sab->uploadVideo(videoFile, m_titleLE->text(), "us-east-1");
   } else if (m_sffRB->isChecked()) {
     QProgressBar *uploadProgress = m_uploadProgress;
-    connect(m_sff, &eXVHP::Service::Streamff::videoUploadProgress, this,
-            [uploadProgress, videoFile](QFile *vidFile, qint64 bytesSent,
-                                        qint64 bytesTotal) {
-              if (videoFile == vidFile) {
-                uploadProgress->setValue(bytesSent);
-                uploadProgress->setMaximum(bytesTotal);
-              }
-            });
+    connect(
+        m_sff, &eXVHP::Service::Streamff::videoUploadProgress, this,
+        [uploadProgress, videoFile](QFile *vidFile, qint64 bytesSent,
+                                    qint64 bytesTotal) {
+          if (videoFile == vidFile) {
+            uploadProgress->setValue(bytesSent);
+            uploadProgress->setMaximum(bytesTotal);
+          }
+        },
+        Qt::UniqueConnection);
 
-    connect(m_sff, &eXVHP::Service::Streamff::videoUploaded, this,
-            [this, videoFile](QFile *vidFile, const QString &linkId,
-                              const QString &videoLink) {
-              if (videoFile == vidFile) {
-                QMessageBox::information(this, "Video Uploaded", videoLink);
-              }
-            });
+    connect(
+        m_sff, &eXVHP::Service::Streamff::videoUploaded, this,
+        [this, videoFile](QFile *vidFile, const QString &linkId,
+                          const QString &videoLink) {
+          if (videoFile == vidFile) {
+            connect(
+                m_red, &eXRC::Service::Reddit::postedUrl, this,
+                [this, videoLink](const QString &postUrl,
+                                  const QString &redditUrl) {
+                  if (postUrl == videoLink) {
+                    QMessageBox::information(this, "Video Posted Successfully!",
+                                             "Posted <a href=\"" + postUrl +
+                                                 "\">Video</a> to <a href=\"" +
+                                                 redditUrl + "\">Reddit</a>!");
+                  }
+                },
+                Qt::UniqueConnection);
+            connect(
+                m_red, &eXRC::Service::Reddit::postUrlError, this,
+                [this, videoLink](const QString &postUrl,
+                                  const QString &error) {
+                  if (postUrl == videoLink) {
+                    QMessageBox::warning(
+                        this, "Video Posted Error!",
+                        "Error while posting video link to Reddit!\n" + error);
+                  }
+                },
+                Qt::UniqueConnection);
 
-    connect(m_sff, &eXVHP::Service::Streamff::videoUploadError, this,
-            [this, videoFile](QFile *vidFile, const QString &error) {
-              if (videoFile == vidFile) {
-                QMessageBox::warning(this, "Streamff Video Upload Error",
-                                     error);
-              }
-            });
+            m_red->postUrl(videoLink, m_titleLE->text(), m_subredditLE->text(),
+                           m_flairLE->text());
+          }
+        },
+        Qt::UniqueConnection);
+
+    connect(
+        m_sff, &eXVHP::Service::Streamff::videoUploadError, this,
+        [this, videoFile](QFile *vidFile, const QString &error) {
+          if (videoFile == vidFile) {
+            QMessageBox::warning(this, "Streamff Video Upload Error", error);
+          }
+        },
+        Qt::UniqueConnection);
 
     m_sff->uploadVideo(videoFile);
   } else if (m_sjaRB->isChecked()) {
     QProgressBar *uploadProgress = m_uploadProgress;
-    connect(m_sja, &eXVHP::Service::Streamja::videoUploadProgress, this,
-            [uploadProgress, videoFile](QFile *vidFile, qint64 bytesSent,
-                                        qint64 bytesTotal) {
-              if (videoFile == vidFile) {
-                uploadProgress->setValue(bytesSent);
-                uploadProgress->setMaximum(bytesTotal);
-              }
-            });
+    connect(
+        m_sja, &eXVHP::Service::Streamja::videoUploadProgress, this,
+        [uploadProgress, videoFile](QFile *vidFile, qint64 bytesSent,
+                                    qint64 bytesTotal) {
+          if (videoFile == vidFile) {
+            uploadProgress->setValue(bytesSent);
+            uploadProgress->setMaximum(bytesTotal);
+          }
+        },
+        Qt::UniqueConnection);
 
-    connect(m_sja, &eXVHP::Service::Streamja::videoUploaded, this,
-            [this, videoFile](QFile *vidFile, const QString &linkId,
-                              const QString &videoLink,
-                              const QString &videoEmbedLink) {
-              if (videoFile == vidFile) {
-                QMessageBox::information(this, "Video Uploaded", videoLink);
-              }
-            });
+    connect(
+        m_sja, &eXVHP::Service::Streamja::videoUploaded, this,
+        [this, videoFile](QFile *vidFile, const QString &linkId,
+                          const QString &videoLink,
+                          const QString &videoEmbedLink) {
+          if (videoFile == vidFile) {
+            connect(
+                m_red, &eXRC::Service::Reddit::postedUrl, this,
+                [this, videoLink](const QString &postUrl,
+                                  const QString &redditUrl) {
+                  if (postUrl == videoLink) {
+                    QMessageBox::information(this, "Video Posted Successfully!",
+                                             "Posted <a href=\"" + postUrl +
+                                                 "\">Video</a> to <a href=\"" +
+                                                 redditUrl + "\">Reddit</a>!");
+                  }
+                },
+                Qt::UniqueConnection);
+            connect(
+                m_red, &eXRC::Service::Reddit::postUrlError, this,
+                [this, videoLink](const QString &postUrl,
+                                  const QString &error) {
+                  if (postUrl == videoLink) {
+                    QMessageBox::warning(
+                        this, "Video Posted Error!",
+                        "Error while posting video link to Reddit!\n" + error);
+                  }
+                },
+                Qt::UniqueConnection);
 
-    connect(m_sja, &eXVHP::Service::Streamja::videoUploadError, this,
-            [this, videoFile](QFile *vidFile, const QString &error) {
-              if (videoFile == vidFile) {
-                QMessageBox::warning(this, "Streamja Video Upload Error",
-                                     error);
-              }
-            });
+            m_red->postUrl(videoLink, m_titleLE->text(), m_subredditLE->text(),
+                           m_flairLE->text());
+          }
+        },
+        Qt::UniqueConnection);
+
+    connect(
+        m_sja, &eXVHP::Service::Streamja::videoUploadError, this,
+        [this, videoFile](QFile *vidFile, const QString &error) {
+          if (videoFile == vidFile) {
+            QMessageBox::warning(this, "Streamja Video Upload Error", error);
+          }
+        },
+        Qt::UniqueConnection);
 
     m_sja->uploadVideo(videoFile);
   } else if (m_swoRB->isChecked()) {
     QProgressBar *uploadProgress = m_uploadProgress;
-    connect(m_swo, &eXVHP::Service::Streamwo::videoUploadProgress, this,
-            [uploadProgress, videoFile](QFile *vidFile, qint64 bytesSent,
-                                        qint64 bytesTotal) {
-              if (videoFile == vidFile) {
-                uploadProgress->setValue(bytesSent);
-                uploadProgress->setMaximum(bytesTotal);
-              }
-            });
+    connect(
+        m_swo, &eXVHP::Service::Streamwo::videoUploadProgress, this,
+        [uploadProgress, videoFile](QFile *vidFile, qint64 bytesSent,
+                                    qint64 bytesTotal) {
+          if (videoFile == vidFile) {
+            uploadProgress->setValue(bytesSent);
+            uploadProgress->setMaximum(bytesTotal);
+          }
+        },
+        Qt::UniqueConnection);
 
-    connect(m_swo, &eXVHP::Service::Streamwo::videoUploaded, this,
-            [this, videoFile](QFile *vidFile, const QString &linkId,
-                              const QString &videoLink) {
-              if (videoFile == vidFile) {
-                QMessageBox::information(this, "Video Uploaded", videoLink);
-              }
-            });
+    connect(
+        m_swo, &eXVHP::Service::Streamwo::videoUploaded, this,
+        [this, videoFile](QFile *vidFile, const QString &linkId,
+                          const QString &videoLink) {
+          if (videoFile == vidFile) {
+            connect(
+                m_red, &eXRC::Service::Reddit::postedUrl, this,
+                [this, videoLink](const QString &postUrl,
+                                  const QString &redditUrl) {
+                  if (postUrl == videoLink) {
+                    QMessageBox::information(this, "Video Posted Successfully!",
+                                             "Posted <a href=\"" + postUrl +
+                                                 "\">Video</a> to <a href=\"" +
+                                                 redditUrl + "\">Reddit</a>!");
+                  }
+                },
+                Qt::UniqueConnection);
+            connect(
+                m_red, &eXRC::Service::Reddit::postUrlError, this,
+                [this, videoLink](const QString &postUrl,
+                                  const QString &error) {
+                  if (postUrl == videoLink) {
+                    QMessageBox::warning(
+                        this, "Video Posted Error!",
+                        "Error while posting video link to Reddit!\n" + error);
+                  }
+                },
+                Qt::UniqueConnection);
 
-    connect(m_swo, &eXVHP::Service::Streamwo::videoUploadError, this,
-            [this, videoFile](QFile *vidFile, const QString &error) {
-              if (videoFile == vidFile) {
-                QMessageBox::warning(this, "Streamwo Video Upload Error",
-                                     error);
-              }
-            });
+            m_red->postUrl(videoLink, m_titleLE->text(), m_subredditLE->text(),
+                           m_flairLE->text());
+          }
+        },
+        Qt::UniqueConnection);
+
+    connect(
+        m_swo, &eXVHP::Service::Streamwo::videoUploadError, this,
+        [this, videoFile](QFile *vidFile, const QString &error) {
+          if (videoFile == vidFile) {
+            QMessageBox::warning(this, "Streamwo Video Upload Error", error);
+          }
+        },
+        Qt::UniqueConnection);
 
     m_swo->uploadVideo(videoFile);
   }
