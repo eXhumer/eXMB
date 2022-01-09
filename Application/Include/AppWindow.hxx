@@ -38,17 +38,17 @@ private:
   eXVHP::Service::Streamwo *m_swo;
   QCheckBox *m_permanentCB;
   QGroupBox *m_authGB, *m_postGB;
-  QLineEdit *m_subredditLE, *m_titleLE, *m_flairLE;
+  QLineEdit *m_subredditLE, *m_titleLE, *m_flairLE, *m_authStateLE;
   QProgressBar *m_uploadProgress;
   QPushButton *m_authBtn, *m_revokeBtn, *m_videoSelectBtn;
   QRadioButton *m_jslRB, *m_mixRB, *m_sabRB, *m_sffRB, *m_sjaRB, *m_swoRB;
   void setupCentralWidget();
   void setupMenuBar();
-  void setupServices();
+  void setupServices(const QString &redditClientId);
   void setupWidgets();
 
 public:
-  AppWindow(QWidget *parent = nullptr);
+  AppWindow(const QString &redditClientId, QWidget *parent = nullptr);
 
 private slots:
   void enableWidgets();

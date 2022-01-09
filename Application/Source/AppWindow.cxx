@@ -17,20 +17,21 @@
 #include <QStandardPaths>
 #include <QVBoxLayout>
 
-AppWindow::AppWindow(QWidget *parent)
+AppWindow::AppWindow(const QString &redditClientId, QWidget *parent)
     : QMainWindow(parent), m_appDataDir(QStandardPaths::writableLocation(
                                QStandardPaths::AppDataLocation)) {
   if (!m_appDataDir.exists())
     m_appDataDir.mkpath(".");
 
   setupWidgets();
-  setupServices();
+  setupServices(redditClientId);
   setupCentralWidget();
   setupMenuBar();
 }
 
 void AppWindow::setupCentralWidget() {
   QVBoxLayout *authLayout = new QVBoxLayout;
+  QHBoxLayout *authStateLayout = new QHBoxLayout;
   QHBoxLayout *postLayout = new QHBoxLayout;
   QVBoxLayout *postHostLayout = new QVBoxLayout;
   QVBoxLayout *postDetailsLayout = new QVBoxLayout;
@@ -56,7 +57,9 @@ void AppWindow::setupCentralWidget() {
   postDetailsLayout->addWidget(m_videoSelectBtn);
   postDetailsLayout->addWidget(m_uploadProgress);
   postLayout->addLayout(postDetailsLayout, 1);
-  authLayout->addWidget(m_permanentCB, 0, Qt::AlignHCenter);
+  authStateLayout->addWidget(m_authStateLE);
+  authStateLayout->addWidget(m_permanentCB);
+  authLayout->addLayout(authStateLayout);
   authLayout->addWidget(m_authBtn);
   authLayout->addWidget(m_revokeBtn);
   m_authGB->setLayout(authLayout);
@@ -93,7 +96,7 @@ void AppWindow::setupMenuBar() {
   setMenuBar(menuBar);
 }
 
-void AppWindow::setupServices() {
+void AppWindow::setupServices(const QString &redditClientId) {
   disableWidgets();
   QNetworkAccessManager *nam = new QNetworkAccessManager;
   m_jsl = new eXVHP::Service::JustStreamLive(nam);
@@ -102,8 +105,6 @@ void AppWindow::setupServices() {
   m_sff = new eXVHP::Service::Streamff(nam);
   m_sja = new eXVHP::Service::Streamja(nam);
   m_swo = new eXVHP::Service::Streamwo(nam);
-
-  QString redditClientId = "bnPnumDqM7YlDueRSzZCDw";
 
   QFile credentialFile(m_appDataDir.filePath("credential.json"));
   if (credentialFile.exists()) {
@@ -123,16 +124,11 @@ void AppWindow::setupServices() {
       if (!refreshToken.isEmpty())
         m_permanentCB->setChecked(true);
 
-      enableWidgets();
-      m_revokeBtn->setDisabled(true);
-      m_permanentCB->setDisabled(true);
       return;
     }
   }
 
   m_red = new eXRC::Service::Reddit(redditClientId, nam);
-  m_authBtn->setEnabled(true);
-  m_permanentCB->setEnabled(true);
   onRevoked();
 }
 
@@ -153,6 +149,9 @@ void AppWindow::setupWidgets() {
   m_sffRB = new QRadioButton("Streamff");
   m_sjaRB = new QRadioButton("Streamja");
   m_swoRB = new QRadioButton("Streamwo");
+  m_authStateLE = new QLineEdit;
+  m_authStateLE->setAlignment(Qt::AlignHCenter);
+  m_authStateLE->setReadOnly(true);
 }
 
 void AppWindow::enableWidgets() {
@@ -208,9 +207,7 @@ void AppWindow::onReady(const QJsonObject &identity) {
   enableWidgets();
   m_authBtn->setDisabled(true);
   m_permanentCB->setDisabled(true);
-
-  QMessageBox::information(this, "Logged in!",
-                           "Logged in as " + identity["name"].toString() + "!");
+  m_authStateLE->setText("Authorized as " + identity["name"].toString() + "!");
 }
 
 void AppWindow::onGrantError(const QString &error) {
@@ -236,6 +233,7 @@ void AppWindow::onRevoked() {
   disableWidgets();
   m_authBtn->setEnabled(true);
   m_permanentCB->setEnabled(true);
+  m_authStateLE->setText("Unauthorized!");
 }
 
 void AppWindow::onRevokeError(const QString &errorString) {
