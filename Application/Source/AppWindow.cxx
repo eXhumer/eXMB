@@ -143,8 +143,11 @@ void AppWindow::setupWidgets() {
   m_authGB = new QGroupBox("Reddit Authorization");
   m_postGB = new QGroupBox("Post Video");
   m_subredditLE = new QLineEdit;
+  m_subredditLE->setAlignment(Qt::AlignHCenter);
   m_titleLE = new QLineEdit;
+  m_titleLE->setAlignment(Qt::AlignHCenter);
   m_flairLE = new QLineEdit;
+  m_flairLE->setAlignment(Qt::AlignHCenter);
   m_uploadProgress = new QProgressBar;
   m_uploadProgress->setTextVisible(false);
   m_authBtn = new QPushButton("Authorize");
