@@ -1,6 +1,11 @@
 configure_file(AppConfig.hxx.in AppConfig.hxx)
 find_package(Qt6 COMPONENTS Network NetworkAuth Widgets REQUIRED)
 
+qt_add_resources(
+APP_RCC
+    Resource/App.qrc
+)
+
 qt_wrap_cpp(
 APP_MOC
     Include/AppWindow.hxx
@@ -9,6 +14,7 @@ APP_MOC
 add_executable(
 ${PROJECT_NAME}
     ${APP_MOC}
+    ${APP_RCC}
     Source/AppWindow.cxx
     Source/Main.cxx
 )

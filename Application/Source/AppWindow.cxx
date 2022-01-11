@@ -20,6 +20,10 @@
 AppWindow::AppWindow(const QString &redditClientId, QWidget *parent)
     : QMainWindow(parent), m_appDataDir(QStandardPaths::writableLocation(
                                QStandardPaths::AppDataLocation)) {
+  QFile appQssFile(":/AppWindowDark.qss");
+  appQssFile.open(QIODevice::ReadOnly);
+  setStyleSheet(QString(appQssFile.readAll()));
+
   if (!m_appDataDir.exists())
     m_appDataDir.mkpath(".");
 
@@ -142,6 +146,7 @@ void AppWindow::setupWidgets() {
   m_titleLE = new QLineEdit;
   m_flairLE = new QLineEdit;
   m_uploadProgress = new QProgressBar;
+  m_uploadProgress->setTextVisible(false);
   m_authBtn = new QPushButton("Authorize");
   m_revokeBtn = new QPushButton("Revoke");
   m_videoSelectBtn = new QPushButton("Select Video File and Upload");

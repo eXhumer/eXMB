@@ -1,0 +1,5 @@
+<!DOCTYPE RCC><RCC version="1.0">
+<qresource>
+    <file alias="AppWindowDark.qss">qss/AppWindowDark.qss</file>
+</qresource>
+</RCC>
