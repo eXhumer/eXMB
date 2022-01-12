@@ -38,11 +38,12 @@
 #include <QSettings>
 #include <QTimer>
 #include <dwmapi.h>
-#include <sstream>
 #include <windows.h>
 
 WORD DWMWA_USE_IMMERSIVE_DARK_MODE = 20;
 WORD DWMWA_USE_IMMERSIVE_DARK_MODE_BEFORE_20H1 = 19;
+int WINDOWS_BUILD_1809 = 17763;
+int WINDOWS_BUILD_20H1 = 18985;
 
 int GetCurrentWindowsBuild() {
   QSettings currentWindowsVersion(
@@ -64,14 +65,17 @@ AppWindow::AppWindow(const QString &redditClientId, QWidget *parent)
     : QMainWindow(parent), m_appDataDir(QStandardPaths::writableLocation(
                                QStandardPaths::AppDataLocation)) {
 #ifdef WIN32
-  m_darkMode = IsWindowsDarkMode();
-  BOOL USE_IMMERSIVE_DARK_MODE = m_darkMode;
-  BOOL IMMERSIVE_DARK_MODE_ENABLE_SUCCESS = SUCCEEDED(DwmSetWindowAttribute(
-      HWND(winId()),
-      GetCurrentWindowsBuild() >= 19041
-          ? DWMWA_USE_IMMERSIVE_DARK_MODE
-          : DWMWA_USE_IMMERSIVE_DARK_MODE_BEFORE_20H1,
-      &USE_IMMERSIVE_DARK_MODE, sizeof(USE_IMMERSIVE_DARK_MODE)));
+  int WINDOWS_BUILD_NUMBER = GetCurrentWindowsBuild();
+  if (WINDOWS_BUILD_NUMBER >= WINDOWS_BUILD_1809) {
+    m_darkMode = IsWindowsDarkMode();
+    BOOL USE_IMMERSIVE_DARK_MODE = m_darkMode;
+    BOOL IMMERSIVE_DARK_MODE_ENABLE_SUCCESS = SUCCEEDED(DwmSetWindowAttribute(
+        HWND(winId()),
+        WINDOWS_BUILD_NUMBER >= WINDOWS_BUILD_20H1
+            ? DWMWA_USE_IMMERSIVE_DARK_MODE
+            : DWMWA_USE_IMMERSIVE_DARK_MODE_BEFORE_20H1,
+        &USE_IMMERSIVE_DARK_MODE, sizeof(USE_IMMERSIVE_DARK_MODE)));
+  }
 #endif // WIN32
   QFile appQssFile(":/AppWindowDark.qss");
   appQssFile.open(QIODevice::ReadOnly);
@@ -142,22 +146,28 @@ void AppWindow::setupCentralWidget() {
   setCentralWidget(centralWidget);
 
 #ifdef WIN32
-  QTimer *themeChangeTimer = new QTimer(this);
-  connect(themeChangeTimer, &QTimer::timeout, this, [this]() {
-    bool darkMode = IsWindowsDarkMode();
+  int WINDOWS_BUILD_NUMBER = GetCurrentWindowsBuild();
+  if (WINDOWS_BUILD_NUMBER >= WINDOWS_BUILD_1809) {
+    QTimer *themeChangeTimer = new QTimer(this);
+    connect(themeChangeTimer, &QTimer::timeout, this,
+            [this, WINDOWS_BUILD_NUMBER]() {
+              bool darkMode = IsWindowsDarkMode();
 
-    if (darkMode != m_darkMode) {
-      m_darkMode = darkMode;
-      BOOL USE_IMMERSIVE_DARK_MODE = m_darkMode;
-      BOOL IMMERSIVE_DARK_MODE_ENABLE_SUCCESS = SUCCEEDED(DwmSetWindowAttribute(
-          HWND(winId()),
-          GetCurrentWindowsBuild() >= 19041
-              ? DWMWA_USE_IMMERSIVE_DARK_MODE
-              : DWMWA_USE_IMMERSIVE_DARK_MODE_BEFORE_20H1,
-          &USE_IMMERSIVE_DARK_MODE, sizeof(USE_IMMERSIVE_DARK_MODE)));
-    }
-  });
-  themeChangeTimer->start(1000);
+              if (darkMode != m_darkMode) {
+                m_darkMode = darkMode;
+                BOOL USE_IMMERSIVE_DARK_MODE = m_darkMode;
+                BOOL IMMERSIVE_DARK_MODE_ENABLE_SUCCESS =
+                    SUCCEEDED(DwmSetWindowAttribute(
+                        HWND(winId()),
+                        WINDOWS_BUILD_NUMBER >= WINDOWS_BUILD_20H1
+                            ? DWMWA_USE_IMMERSIVE_DARK_MODE
+                            : DWMWA_USE_IMMERSIVE_DARK_MODE_BEFORE_20H1,
+                        &USE_IMMERSIVE_DARK_MODE,
+                        sizeof(USE_IMMERSIVE_DARK_MODE)));
+              }
+            });
+    themeChangeTimer->start(1000);
+  }
 #endif // WIN32
 }
 
