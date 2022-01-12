@@ -113,7 +113,13 @@ void AppWindow::setupMenuBar() {
   QAction *exitAct = fileMenu->addAction("Exit");
   connect(exitAct, &QAction::triggered, this,
           [this](bool checked) { QApplication::quit(); });
+  QAction *aboutAct = helpMenu->addAction("About");
   QAction *aboutQtAct = helpMenu->addAction("About Qt");
+  connect(aboutAct, &QAction::triggered, this, [this](bool checked) {
+    QMessageBox::about(this, "About",
+                       "Reddit media poster via external media hosting "
+                       "platforms.\nCopyright (C) 2022 - eXhumer");
+  });
   connect(aboutQtAct, &QAction::triggered, this,
           [this](bool checked) { QMessageBox::aboutQt(this); });
   setMenuBar(menuBar);
