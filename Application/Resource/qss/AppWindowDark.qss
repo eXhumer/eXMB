@@ -46,6 +46,7 @@ QRadioButton{
 }
 QProgressBar{
   border-radius: 5px;
+  background-color : rgba(0, 0, 0, 0.2);
 }
 QProgressBar::chunk{
   background-color: rgb(59, 122, 87);
