@@ -34,10 +34,45 @@
 #include <QMessageBox>
 #include <QStandardPaths>
 #include <QVBoxLayout>
+#ifdef WIN32
+#include <QSettings>
+#include <QTimer>
+#include <dwmapi.h>
+#include <sstream>
+#include <windows.h>
+
+WORD DWMWA_USE_IMMERSIVE_DARK_MODE = 20;
+WORD DWMWA_USE_IMMERSIVE_DARK_MODE_BEFORE_20H1 = 19;
+
+int GetCurrentWindowsBuild() {
+  QSettings currentWindowsVersion(
+      "HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion",
+      QSettings::NativeFormat);
+  return currentWindowsVersion.value("CurrentBuild").toString().toInt();
+}
+
+bool IsWindowsDarkMode(bool *ok = nullptr) {
+  QSettings currentTheme(
+      "HKEY_CURRENT_"
+      "USER\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Themes\\Personalize",
+      QSettings::NativeFormat);
+  return currentTheme.value("AppsUseLightTheme").toUInt(ok) == 0;
+}
+#endif // WIN32
 
 AppWindow::AppWindow(const QString &redditClientId, QWidget *parent)
     : QMainWindow(parent), m_appDataDir(QStandardPaths::writableLocation(
                                QStandardPaths::AppDataLocation)) {
+#ifdef WIN32
+  m_darkMode = IsWindowsDarkMode();
+  BOOL USE_IMMERSIVE_DARK_MODE = m_darkMode;
+  BOOL IMMERSIVE_DARK_MODE_ENABLE_SUCCESS = SUCCEEDED(DwmSetWindowAttribute(
+      HWND(winId()),
+      GetCurrentWindowsBuild() >= 19041
+          ? DWMWA_USE_IMMERSIVE_DARK_MODE
+          : DWMWA_USE_IMMERSIVE_DARK_MODE_BEFORE_20H1,
+      &USE_IMMERSIVE_DARK_MODE, sizeof(USE_IMMERSIVE_DARK_MODE)));
+#endif // WIN32
   QFile appQssFile(":/AppWindowDark.qss");
   appQssFile.open(QIODevice::ReadOnly);
   setStyleSheet(QString(appQssFile.readAll()));
@@ -105,6 +140,25 @@ void AppWindow::setupCentralWidget() {
   centralLayout->addStretch();
   centralWidget->setLayout(centralLayout);
   setCentralWidget(centralWidget);
+
+#ifdef WIN32
+  QTimer *themeChangeTimer = new QTimer(this);
+  connect(themeChangeTimer, &QTimer::timeout, this, [this]() {
+    bool darkMode = IsWindowsDarkMode();
+
+    if (darkMode != m_darkMode) {
+      m_darkMode = darkMode;
+      BOOL USE_IMMERSIVE_DARK_MODE = m_darkMode;
+      BOOL IMMERSIVE_DARK_MODE_ENABLE_SUCCESS = SUCCEEDED(DwmSetWindowAttribute(
+          HWND(winId()),
+          GetCurrentWindowsBuild() >= 19041
+              ? DWMWA_USE_IMMERSIVE_DARK_MODE
+              : DWMWA_USE_IMMERSIVE_DARK_MODE_BEFORE_20H1,
+          &USE_IMMERSIVE_DARK_MODE, sizeof(USE_IMMERSIVE_DARK_MODE)));
+    }
+  });
+  themeChangeTimer->start(1000);
+#endif // WIN32
 }
 
 void AppWindow::setupMenuBar() {

@@ -3,7 +3,7 @@ cmake_minimum_required(VERSION 3.22)
 project(
 eXMB
     LANGUAGES CXX
-    VERSION 1.0.6
+    VERSION 1.0.7
 )
 
 add_subdirectory(Library)

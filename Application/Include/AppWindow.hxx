@@ -45,6 +45,9 @@ class AppWindow : public QMainWindow {
   Q_OBJECT
 
 private:
+#if WIN32
+  bool m_darkMode;
+#endif // WIN32
   QDir m_appDataDir;
   eXRC::Service::Reddit *m_red;
   eXVHP::Service::JustStreamLive *m_jsl;
