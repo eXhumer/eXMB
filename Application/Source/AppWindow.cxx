@@ -16,6 +16,7 @@
  */
 
 #include "AppWindow.hxx"
+#include "AppConfig.hxx"
 #include "eXRC/Reddit.hxx"
 #include "eXVHP/JustStreamLive.hxx"
 #include "eXVHP/Mixture.hxx"
@@ -117,8 +118,9 @@ void AppWindow::setupMenuBar() {
   QAction *aboutQtAct = helpMenu->addAction("About Qt");
   connect(aboutAct, &QAction::triggered, this, [this](bool checked) {
     QMessageBox::about(this, "About",
-                       "Reddit media poster via external media hosting "
-                       "platforms.\nCopyright (C) 2022 - eXhumer");
+                       QString(APP_NAME) + " v" + QString(APP_VERSION) +
+                           "\n\nReddit media poster via external media hosting "
+                           "platforms.\n\nCopyright (C) 2022 - eXhumer");
   });
   connect(aboutQtAct, &QAction::triggered, this,
           [this](bool checked) { QMessageBox::aboutQt(this); });
