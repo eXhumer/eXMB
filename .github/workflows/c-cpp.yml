@@ -18,7 +18,7 @@ jobs:
         git clone git://code.qt.io/qt/qt5.git qt622 --branch=6.2.2
         cd .\qt622
         perl init-repository --module-subset=qtbase,qtnetworkauth
-    - name: Build Qt
+    - name: Build OpenSSL 1.1.1m
       run: |
         $VSWHERE_PATH = "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe"
         $DEV_CMD_ARGS = "-arch=amd64", "-host_arch=amd64", "-no_logo"
@@ -27,9 +27,37 @@ jobs:
         $MSVC2019_DEVSHELL_PATH = "$MSVC2019_INSTALL_PATH\Common7\Tools\Microsoft.VisualStudio.DevShell.dll"
         Import-Module $MSVC2019_DEVSHELL_PATH
         Enter-VsDevShell -VsInstallPath "$MSVC2019_INSTALL_PATH" -DevCmdArguments ($DEV_CMD_ARGS -join " ")
-        cmake -B ..\qt622-build -S ..\qt622 -DCMAKE_INSTALL_PREFIX="..\Qt\6.2.2\msvc2019_64" -DQT_QMAKE_TARGET_MKSPEC="win32-msvc" -DCMAKE_CXX_COMPILER=cl -DCMAKE_BUILD_TYPE=Release -G Ninja
-        cmake --build ..\qt622-build --parallel
-        cmake --install ..\qt622-build
+        cd ../
+        git clone https://github.com/openssl/openssl.git --origin=openssl
+        cd openssl
+        git checkout OpenSSL_1_1_1m
+        mkdir ../OpenSSL-1.1.1m
+        ${env:OPENSSL_PREFIX} = (Resolve-Path ..\OpenSSL-1.1.1m).Path
+        $NASM_URL = "https://www.nasm.us/pub/nasm/releasebuilds/2.15.05/win64/nasm-2.15.05-win64.zip"
+        Invoke-WebRequest -Uri $NASM_URL -OutFile ../NASM.zip
+        cd ../
+        Expand-Archive NASM.zip
+        ${env:NASM_PATH} = (Resolve-Path ./NASM/nasm-2.15.05/).Path
+        ${env:PATH} += ";${env:NASM_PATH}"
+        perl Configure --prefix=${env:OPENSSL_PREFIX} VC-WIN64A
+        nmake
+        nmake install
+    - name: Build Qt 6.2.2
+      run: |
+        $VSWHERE_PATH = "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe"
+        $DEV_CMD_ARGS = "-arch=amd64", "-host_arch=amd64", "-no_logo"
+        $MSVC2019_VSWHERE_INSTALL_PATH_ARGS = "-products", "*", "-requires", "Microsoft.VisualStudio.Component.VC.Tools.x86.x64", "-version", "[16.0,17.0)", "-property", "installationPath"
+        $MSVC2019_INSTALL_PATH = & $VSWHERE_PATH $MSVC2019_VSWHERE_INSTALL_PATH_ARGS
+        $MSVC2019_DEVSHELL_PATH = "$MSVC2019_INSTALL_PATH\Common7\Tools\Microsoft.VisualStudio.DevShell.dll"
+        Import-Module $MSVC2019_DEVSHELL_PATH
+        Enter-VsDevShell -VsInstallPath "$MSVC2019_INSTALL_PATH" -DevCmdArguments ($DEV_CMD_ARGS -join " ")
+        ${env:OPENSSL_PREFIX} = (Resolve-Path ..\OpenSSL-1.1.1m).Path
+        ${env:QT6_BUILD_PATH} = (Resolve-Path ..\qt622-build).Path
+        ${env:QT6_PREFIX} = (Resolve-Path ..\Qt\6.2.2\msvc2019_64).Path
+        ${env:QT6_SRC} = (Resolve-Path ..\qt622).Path
+        cmake -B ${env:QT6_BUILD_PATH} -S ${env:QT6_SRC} -DOPENSSL_ROOT_DIR=${env:OPENSSL_PREFIX} -DCMAKE_INSTALL_PREFIX=${env:QT6_PREFIX} -DQT_QMAKE_TARGET_MKSPEC="win32-msvc" -DCMAKE_CXX_COMPILER=cl -DCMAKE_BUILD_TYPE=Release -G Ninja
+        cmake --build ${env:QT6_BUILD_PATH} --parallel
+        cmake --install ${env:QT6_BUILD_PATH}
     - name: Build eXMB
       run: |
         $VSWHERE_PATH = "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe"
@@ -39,12 +67,20 @@ jobs:
         $MSVC2019_DEVSHELL_PATH = "$MSVC2019_INSTALL_PATH\Common7\Tools\Microsoft.VisualStudio.DevShell.dll"
         Import-Module $MSVC2019_DEVSHELL_PATH
         Enter-VsDevShell -VsInstallPath "$MSVC2019_INSTALL_PATH" -DevCmdArguments ($DEV_CMD_ARGS -join " ")
-        ${env:CMAKE_PREFIX_PATH} = (Resolve-Path ..\Qt\6.2.2\msvc2019_64).Path
-        cmake -B ..\eXMB-build -S . -DCMAKE_INSTALL_PREFIX="..\eXMB-ReleaseOut" -DCMAKE_SYSTEM_VERSION="10.0.22000.0"
-        cmake --build ..\eXMB-build --target eXMB --config Release --parallel
-        cmake --install ..\eXMB-build
+        ${env:QT6_PREFIX} = (Resolve-Path ..\Qt\6.2.2\msvc2019_64).Path
+        ${env:CMAKE_PREFIX_PATH} = ${env:QT6_PREFIX}
+        ${env:EXMB_BUILD_PATH} = (Resolve-Path ..\eXMB-build).Path
         ${env:EXMB_RELEASE_PATH} = (Resolve-Path ..\eXMB-ReleaseOut).Path
+        cmake -B ${env:EXMB_BUILD_PATH} -S . -DCMAKE_INSTALL_PREFIX=${env:EXMB_RELEASE_PATH} -DCMAKE_SYSTEM_VERSION="10.0.22000.0"
+        cmake --build ${env:EXMB_BUILD_PATH} --target eXMB --config Release --parallel
+        cmake --install ${env:EXMB_BUILD_PATH}
         echo "EXMB_RELEASE_PATH=${env:EXMB_RELEASE_PATH}" >> ${env:GITHUB_ENV}
+    - name: Deploy Qt6 shared libraries with eXMB
+      run: |
+        ${env:EXMB_RELEASE_PATH} = (Resolve-Path ..\eXMB-ReleaseOut).Path
+        ${env:QT6_PREFIX} = (Resolve-Path ..\Qt\6.2.2\msvc2019_64).Path
+        ${env:PATH} += ";${env:QT6_PREFIX}\bin"
+        windeployqt --release --no-translations ${env:EXMB_RELEASE_PATH}
     - name: Upload build artifact
       uses: actions/upload-artifact@v2
       with:
