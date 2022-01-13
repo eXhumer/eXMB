@@ -17,7 +17,7 @@ jobs:
         cd ..\
         git clone git://code.qt.io/qt/qt5.git qt622 --branch=6.2.2
         cd .\qt622
-        perl init-repository --module-subset=qtbase,qtnetworkauth
+        perl init-repository --module-subset=qtbase,qtnetworkauth,qttools
     - name: Build OpenSSL 1.1.1m
       run: |
         $VSWHERE_PATH = "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe"
