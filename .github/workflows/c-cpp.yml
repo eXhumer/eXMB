@@ -23,7 +23,7 @@ jobs:
         $MSVC2019_INSTALL_PATH = & $VSWHERE_PATH $MSVC2019_VSWHERE_INSTALL_PATH_ARGS
         $MSVC2019_DEVSHELL_PATH = "$MSVC2019_INSTALL_PATH\Common7\Tools\Microsoft.VisualStudio.DevShell.dll"
         Import-Module $MSVC2019_DEVSHELL_PATH
-        Enter-VsDevShell -VsInstanceId "$MSVC2019_INSTANCE_ID" -DevCmdArguments ($DEV_CMD_ARGS -join " ")
+        Enter-VsDevShell -VsInstallPath "$MSVC2019_INSTALL_PATH" -DevCmdArguments ($DEV_CMD_ARGS -join " ")
         mkdir ..\qt622-build
         cd ..\qt622-build
         ..\qt622\configure.bat -prefix D:\a\eXMB\qt_622_msvc2019_64 -release -platform win32-msvc
@@ -37,6 +37,6 @@ jobs:
         $MSVC2019_INSTALL_PATH = & $VSWHERE_PATH $MSVC2019_VSWHERE_INSTALL_PATH_ARGS
         $MSVC2019_DEVSHELL_PATH = "$MSVC2019_INSTALL_PATH\Common7\Tools\Microsoft.VisualStudio.DevShell.dll"
         Import-Module $MSVC2019_DEVSHELL_PATH
-        Enter-VsDevShell -VsInstanceId "$MSVC2019_INSTANCE_ID" -DevCmdArguments ($DEV_CMD_ARGS -join " ")
+        Enter-VsDevShell -VsInstallPath "$MSVC2019_INSTALL_PATH" -DevCmdArguments ($DEV_CMD_ARGS -join " ")
         cmake -B build -S . -DCMAKE_PREFIX_PATH=D:\a\eXMB\qt_622_msvc2019_64 -CMAKE_INSTALL_PREFIX=out -DCMAKE_SYSTEM_VERSION=10.0.22000.0
         cmake --build build --target eXMB --config Release
