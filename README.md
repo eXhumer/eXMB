@@ -1,6 +1,6 @@
 # eXMB
 Reddit media poster via external media hosting platforms. The video file is uploaded to a supported host and posted on Reddit as a link post. Authorization/Communication with Reddit is done via OAuth2.<br/>
-<img src="https://user-images.githubusercontent.com/62310242/149079634-507a6d9a-73ba-4aeb-8be3-936c1c0829fa.png" width="400">
+<img src="https://user-images.githubusercontent.com/62310242/149306066-ad7f2164-79e5-40df-b177-2c1f6159794b.png">
 
 ## Supported Media Hosting Platforms
 * JustStreamLive
