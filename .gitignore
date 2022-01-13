@@ -1,2 +1,6 @@
 /.vscode/
 /build/
+/ReleaseOut/
+/DebugOut/
+/MinSizeRelOut/
+/RelWithDebInfoOut/

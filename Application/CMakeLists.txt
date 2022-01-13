@@ -50,3 +50,5 @@ ${PROJECT_NAME}
         eXRC
         eXVHP
 )
+
+install(TARGETS ${PROJECT_NAME})
