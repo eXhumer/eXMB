@@ -10,17 +10,18 @@ jobs:
     steps:
     - uses: actions/checkout@v2
     - name: Clone Qt 6.2.2
-      run: git clone git://code.qt.io/qt/qt5.git qt622 --branch=6.2.2
+      run: |
+        ls .
+        git clone git://code.qt.io/qt/qt5.git qt622 --branch=6.2.2
     - name: Initialize Qt Repository
       run: |
+        ls .
         cd qt622
         perl init-repository --module-subset=qtbase,qtnetworkauth
     - name: Configure Qt Repository
       run: |
         mkdir ..\qt622-build
         cd ..\qt622-build
-        ls ..\
-        ls ..\qt622\
         ..\qt622\configure.bat -prefix C:\Qt\6.2.2\msvc2019_64 -release -platform win32-msvc
     - name: Build Qt6
       run: |
