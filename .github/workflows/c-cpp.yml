@@ -33,6 +33,7 @@ jobs:
         git checkout OpenSSL_1_1_1m
         mkdir ../OpenSSL-1.1.1m
         ${env:OPENSSL_PREFIX} = (Resolve-Path ..\OpenSSL-1.1.1m).Path
+        ${env:OPENSSL_DIR} = (Resolve-Path ..\OpenSSL-Dir).Path
         $NASM_URL = "https://www.nasm.us/pub/nasm/releasebuilds/2.15.05/win64/nasm-2.15.05-win64.zip"
         Invoke-WebRequest -Uri $NASM_URL -OutFile ../NASM.zip
         cd ../
@@ -40,7 +41,7 @@ jobs:
         ${env:NASM_PATH} = (Resolve-Path ./NASM/nasm-2.15.05/).Path
         ${env:PATH} += ";${env:NASM_PATH}"
         cd ./openssl/
-        perl Configure --prefix=${env:OPENSSL_PREFIX} VC-WIN64A
+        perl Configure --openssldir=${env:OPENSSL_DIR} --prefix=${env:OPENSSL_PREFIX} VC-WIN64A
         nmake
         nmake install
     - name: Build Qt 6.2.2
