@@ -9,42 +9,34 @@ jobs:
     runs-on: windows-latest
     steps:
     - uses: actions/checkout@v2
-    - name: Clone Qt 6.2.2
+    - name: Get Qt 6.2.2 Source Code
       run: |
-        ls .\
-        ls ..\
         cd ..\
         git clone git://code.qt.io/qt/qt5.git qt622 --branch=6.2.2
-    - name: Initialize Qt Repository
-      run: |
-        ls .\
-        ls ..\
-        cd ..\qt622
+        cd .\qt622
         perl init-repository --module-subset=qtbase,qtnetworkauth
-    - name: Configure Qt Repository
+    - name: Build Qt
       run: |
-        ls .\
-        ls ..\
+        $VSWHERE_PATH = "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe"
+        $DEV_CMD_ARGS = "-arch=amd64", "-host_arch=amd64", "-no_logo"
+        $MSVC2019_VSWHERE_INSTANCE_ID_ARGS = "-products", "*", "-requires", "Microsoft.VisualStudio.Component.VC.Tools.x86.x64", "-version", "[16.0,17.0)", "-property", "instanceId"
+        $MSVC2019_INSTANCE_ID = & $VSWHERE_PATH $MSVC2019_VSWHERE_INSTANCE_ID_ARGS
+        $MSVC2019_DEVSHELL_PATH = "$MSVC2019_INSTALL_PATH\Common7\Tools\Microsoft.VisualStudio.DevShell.dll"
+        Import-Module $LATEST_MSVC_DEVSHELL_PATH
+        Enter-VsDevShell -VsInstanceId "$MSVC2019_INSTANCE_ID" -DevCmdArguments ($DEV_CMD_ARGS -join " ")
         mkdir ..\qt622-build
         cd ..\qt622-build
-        ..\qt622\configure.bat -prefix C:\Qt\6.2.2\msvc2019_64 -release -platform win32-msvc
-    - name: Build Qt6
-      run: |
-        ls .\
-        ls ..\
-        cd ..\qt622-build
-        cmake --build .
-    - name: Install Qt6 to prefix
-      run: |
-        ls .\
-        ls ..\
-        cd ..\qt622-build
+        ..\qt622\configure.bat -prefix D:\a\eXMB\qt_622_msvc2019_64 -release -platform win32-msvc
         cmake --build .
         cmake --install .
-    - name: Configure Project
-      run: |
-        ls .\
-        ls ..\
-        cmake -B build -S . -DCMAKE_PREFIX_PATH=C:\Qt\6.2.2\msvc2019_64 -CMAKE_INSTALL_PREFIX=out -DCMAKE_SYSTEM_VERSION=10.0.22000.0
     - name: Build eXMB
-      run: cmake --build build --target eXMB --config Release
+      run: |
+        $VSWHERE_PATH = "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe"
+        $DEV_CMD_ARGS = "-arch=amd64", "-host_arch=amd64", "-no_logo"
+        $MSVC2019_VSWHERE_INSTANCE_ID_ARGS = "-products", "*", "-requires", "Microsoft.VisualStudio.Component.VC.Tools.x86.x64", "-version", "[16.0,17.0)", "-property", "instanceId"
+        $MSVC2019_INSTANCE_ID = & $VSWHERE_PATH $MSVC2019_VSWHERE_INSTANCE_ID_ARGS
+        $MSVC2019_DEVSHELL_PATH = "$MSVC2019_INSTALL_PATH\Common7\Tools\Microsoft.VisualStudio.DevShell.dll"
+        Import-Module $LATEST_MSVC_DEVSHELL_PATH
+        Enter-VsDevShell -VsInstanceId "$MSVC2019_INSTANCE_ID" -DevCmdArguments ($DEV_CMD_ARGS -join " ")
+        cmake -B build -S . -DCMAKE_PREFIX_PATH=D:\a\eXMB\qt_622_msvc2019_64 -CMAKE_INSTALL_PREFIX=out -DCMAKE_SYSTEM_VERSION=10.0.22000.0
+        cmake --build build --target eXMB --config Release
