@@ -44,6 +44,7 @@ jobs:
         cmake --build ..\eXMB-build --target eXMB --config Release --parallel
         cmake --install ..\eXMB-build
         ${env:EXMB_RELEASE_PATH} = (Resolve-Path ..\eXMB-ReleaseOut).Path
+        echo "EXMB_RELEASE_PATH=${env:EXMB_RELEASE_PATH}" >> ${env:GITHUB_ENV}
     - name: Upload build artifact
       uses: actions/upload-artifact@v2
       with:
