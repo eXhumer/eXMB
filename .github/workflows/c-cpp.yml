@@ -55,7 +55,9 @@ jobs:
         Import-Module $MSVC2019_DEVSHELL_PATH
         Enter-VsDevShell -VsInstallPath "$MSVC2019_INSTALL_PATH" -DevCmdArguments ($DEV_CMD_ARGS -join " ")
         ${env:OPENSSL_PREFIX} = (Resolve-Path ..\OpenSSL-1.1.1m).Path
+        mkdir ..\qt622-build
         ${env:QT6_BUILD_PATH} = (Resolve-Path ..\qt622-build).Path
+        mkdir ..\Qt\6.2.2\msvc2019_64
         ${env:QT6_PREFIX} = (Resolve-Path ..\Qt\6.2.2\msvc2019_64).Path
         ${env:QT6_SRC} = (Resolve-Path ..\qt622).Path
         cmake -B ${env:QT6_BUILD_PATH} -S ${env:QT6_SRC} -DOPENSSL_ROOT_DIR=${env:OPENSSL_PREFIX} -DCMAKE_INSTALL_PREFIX=${env:QT6_PREFIX} -DQT_QMAKE_TARGET_MKSPEC="win32-msvc" -DCMAKE_CXX_COMPILER=cl -DCMAKE_BUILD_TYPE=Release -G Ninja
@@ -72,7 +74,9 @@ jobs:
         Enter-VsDevShell -VsInstallPath "$MSVC2019_INSTALL_PATH" -DevCmdArguments ($DEV_CMD_ARGS -join " ")
         ${env:QT6_PREFIX} = (Resolve-Path ..\Qt\6.2.2\msvc2019_64).Path
         ${env:CMAKE_PREFIX_PATH} = ${env:QT6_PREFIX}
+        mkdir ..\eXMB-build
         ${env:EXMB_BUILD_PATH} = (Resolve-Path ..\eXMB-build).Path
+        mkdir ..\eXMB-ReleaseOut
         ${env:EXMB_RELEASE_PATH} = (Resolve-Path ..\eXMB-ReleaseOut).Path
         cmake -B ${env:EXMB_BUILD_PATH} -S . -DCMAKE_INSTALL_PREFIX=${env:EXMB_RELEASE_PATH} -DCMAKE_SYSTEM_VERSION="10.0.22000.0"
         cmake --build ${env:EXMB_BUILD_PATH} --target eXMB --config Release --parallel
