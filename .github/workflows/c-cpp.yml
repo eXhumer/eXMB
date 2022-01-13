@@ -31,8 +31,6 @@ jobs:
         cmake --build ..\qt622-build --parallel
         cmake --install ..\qt622-build
     - name: Build eXMB
-      env:
-        CMAKE_PREFIX_PATH: ..\Qt\6.2.2\msvc2019_64
       run: |
         $VSWHERE_PATH = "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe"
         $DEV_CMD_ARGS = "-arch=amd64", "-host_arch=amd64", "-no_logo"
@@ -41,11 +39,13 @@ jobs:
         $MSVC2019_DEVSHELL_PATH = "$MSVC2019_INSTALL_PATH\Common7\Tools\Microsoft.VisualStudio.DevShell.dll"
         Import-Module $MSVC2019_DEVSHELL_PATH
         Enter-VsDevShell -VsInstallPath "$MSVC2019_INSTALL_PATH" -DevCmdArguments ($DEV_CMD_ARGS -join " ")
+        ${env:CMAKE_PREFIX_PATH} = (Resolve-Path ..\Qt\6.2.2\msvc2019_64).Path
         cmake -B ..\eXMB-build -S . -DCMAKE_INSTALL_PREFIX="..\eXMB-ReleaseOut" -DCMAKE_SYSTEM_VERSION="10.0.22000.0"
         cmake --build ..\eXMB-build --target eXMB --config Release --parallel
         cmake --install ..\eXMB-build
+        ${env:EXMB_RELEASE_PATH} = (Resolve-Path ..\eXMB-ReleaseOut).Path
     - name: Upload build artifact
       uses: actions/upload-artifact@v2
       with:
         name: win32-qt622-msvc2019_64
-        path: ../eXMB-ReleaseOut
+        path: ${{ env.EXMB_RELEASE_PATH }}
