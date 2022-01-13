@@ -8,7 +8,10 @@ jobs:
   build-qt622-msvc2019_64:
     runs-on: windows-latest
     steps:
-    - uses: actions/checkout@v2
+    - name: Checkout project source code
+      uses: actions/checkout@v2
+    - name: Checkout project submodules
+      run: git submodule update --init --recursive
     - name: Get Qt 6.2.2 Source Code
       run: |
         cd ..\
