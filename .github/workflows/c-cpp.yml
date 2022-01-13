@@ -28,7 +28,7 @@ jobs:
         Import-Module $MSVC2019_DEVSHELL_PATH
         Enter-VsDevShell -VsInstallPath "$MSVC2019_INSTALL_PATH" -DevCmdArguments ($DEV_CMD_ARGS -join " ")
         cmake -B ..\qt622-build -S ..\qt622 -DCMAKE_INSTALL_PREFIX="..\qt_622_msvc2019_64" -DQT_QMAKE_TARGET_MKSPEC="win32-msvc" -DCMAKE_CXX_COMPILER=cl -DCMAKE_BUILD_TYPE=Release -G Ninja
-        cmake --build ..\qt622-build --parallel 2
+        cmake --build ..\qt622-build --parallel
         cmake --install ..\qt622-build
     - name: Build eXMB
       run: |
@@ -40,7 +40,9 @@ jobs:
         Import-Module $MSVC2019_DEVSHELL_PATH
         Enter-VsDevShell -VsInstallPath "$MSVC2019_INSTALL_PATH" -DevCmdArguments ($DEV_CMD_ARGS -join " ")
         cmake -B ..\eXMB-build -S . -DCMAKE_INSTALL_PREFIX="..\eXMB-ReleaseOut" -DCMAKE_PREFIX_PATH="..\qt_622_msvc2019_64" -DCMAKE_SYSTEM_VERSION="10.0.22000.0"
-        cmake --build ..\eXMB-build --target eXMB --config Release --parallel 2
+        ls ..\qt_622_msvc2019_64
+        cat ..\eXMB-build\CMakeFiles\CMakeOutput.log
+        cmake --build ..\eXMB-build --target eXMB --config Release --parallel
         cmake --install ..\eXMB-build
     - name: Upload build artifact
       uses: actions/upload-artifact@v2
