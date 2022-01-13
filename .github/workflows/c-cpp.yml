@@ -8,7 +8,7 @@ jobs:
   build-application:
     runs-on: windows-latest
     steps:
-    - uses: actions/checkout@qt6-cmake
+    - uses: actions/checkout@v2
     - name: Clone Qt 6.2.2
       run: git clone git://code.qt.io/qt/qt5.git qt622 --branch=6.2.2
     - name: Initialize Qt Repository
