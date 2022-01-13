@@ -60,9 +60,9 @@ jobs:
         mkdir ..\Qt\6.2.2\msvc2019_64
         ${env:QT6_PREFIX} = (Resolve-Path ..\Qt\6.2.2\msvc2019_64).Path
         ${env:QT6_SRC} = (Resolve-Path ..\qt622).Path
-        cmake -B ${env:QT6_BUILD_PATH} -S ${env:QT6_SRC} -DOPENSSL_ROOT_DIR=${env:OPENSSL_PREFIX} -DCMAKE_INSTALL_PREFIX=${env:QT6_PREFIX} -DQT_QMAKE_TARGET_MKSPEC="win32-msvc" -DCMAKE_CXX_COMPILER=cl -DCMAKE_BUILD_TYPE=Release -G Ninja
-        cmake --build ${env:QT6_BUILD_PATH} --parallel
-        cmake --install ${env:QT6_BUILD_PATH}
+        cmake -B "${env:QT6_BUILD_PATH}" -S "${env:QT6_SRC}" -DOPENSSL_ROOT_DIR="${env:OPENSSL_PREFIX}" -DCMAKE_INSTALL_PREFIX="${env:QT6_PREFIX}" -DQT_QMAKE_TARGET_MKSPEC="win32-msvc" -DCMAKE_CXX_COMPILER=cl -DCMAKE_BUILD_TYPE=Release -G Ninja
+        cmake --build "${env:QT6_BUILD_PATH}" --parallel
+        cmake --install "${env:QT6_BUILD_PATH}"
     - name: Build eXMB
       run: |
         $VSWHERE_PATH = "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe"
@@ -78,9 +78,9 @@ jobs:
         ${env:EXMB_BUILD_PATH} = (Resolve-Path ..\eXMB-build).Path
         mkdir ..\eXMB-ReleaseOut
         ${env:EXMB_RELEASE_PATH} = (Resolve-Path ..\eXMB-ReleaseOut).Path
-        cmake -B ${env:EXMB_BUILD_PATH} -S . -DCMAKE_INSTALL_PREFIX=${env:EXMB_RELEASE_PATH} -DCMAKE_SYSTEM_VERSION="10.0.22000.0"
-        cmake --build ${env:EXMB_BUILD_PATH} --target eXMB --config Release --parallel
-        cmake --install ${env:EXMB_BUILD_PATH}
+        cmake -B "${env:EXMB_BUILD_PATH}" -S . -DCMAKE_INSTALL_PREFIX="${env:EXMB_RELEASE_PATH}" -DCMAKE_SYSTEM_VERSION="10.0.22000.0"
+        cmake --build "${env:EXMB_BUILD_PATH}" --target eXMB --config Release --parallel
+        cmake --install "${env:EXMB_BUILD_PATH}"
         echo "EXMB_RELEASE_PATH=${env:EXMB_RELEASE_PATH}" >> ${env:GITHUB_ENV}
     - name: Deploy Qt6 shared libraries with eXMB
       run: |
