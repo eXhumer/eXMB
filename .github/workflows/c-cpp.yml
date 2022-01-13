@@ -5,7 +5,7 @@ on:
   pull_request:
     branches: [ qt6-cmake ]
 jobs:
-  build-qt-6.2.2-msvc2019_64:
+  build-qt622-msvc2019_64:
     runs-on: windows-latest
     steps:
     - uses: actions/checkout@v2
