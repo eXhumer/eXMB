@@ -19,6 +19,8 @@ jobs:
       run: |
         mkdir ..\qt622-build
         cd ..\qt622-build
+        ls ..\
+        ls ..\qt622\
         ..\qt622\configure.bat -prefix C:\Qt\6.2.2\msvc2019_64 -release -platform win32-msvc
     - name: Build Qt6
       run: |
