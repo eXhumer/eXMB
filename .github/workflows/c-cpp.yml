@@ -27,11 +27,9 @@ jobs:
         $MSVC2019_DEVSHELL_PATH = "$MSVC2019_INSTALL_PATH\Common7\Tools\Microsoft.VisualStudio.DevShell.dll"
         Import-Module $MSVC2019_DEVSHELL_PATH
         Enter-VsDevShell -VsInstallPath "$MSVC2019_INSTALL_PATH" -DevCmdArguments ($DEV_CMD_ARGS -join " ")
-        mkdir ..\qt622-build
-        cd ..\qt622-build
-        ..\qt622\configure.bat -prefix ..\qt_622_msvc2019_64 -release -platform win32-msvc
-        cmake --build . --parallel 2
-        cmake --install .
+        cmake -B ..\qt622-build -S ..\qt622 -DCMAKE_INSTALL_PREFIX="..\qt_622_msvc2019_64" -DQT_QMAKE_TARGET_MKSPEC="win32-msvc" -DCMAKE_CXX_COMPILER=cl -DCMAKE_BUILD_TYPE=Release -G Ninja
+        cmake --build ..\qt622-build --parallel 2
+        cmake --install ..\qt622-build
     - name: Build eXMB
       run: |
         $VSWHERE_PATH = "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe"
@@ -41,11 +39,11 @@ jobs:
         $MSVC2019_DEVSHELL_PATH = "$MSVC2019_INSTALL_PATH\Common7\Tools\Microsoft.VisualStudio.DevShell.dll"
         Import-Module $MSVC2019_DEVSHELL_PATH
         Enter-VsDevShell -VsInstallPath "$MSVC2019_INSTALL_PATH" -DevCmdArguments ($DEV_CMD_ARGS -join " ")
-        cmake -B build -S . -DCMAKE_PREFIX_PATH="..\qt_622_msvc2019_64" -CMAKE_INSTALL_PREFIX=out -DCMAKE_SYSTEM_VERSION="10.0.22000.0"
-        cmake --build build --target eXMB --config Release --parallel 2
-        cmake --install build
+        cmake -B ..\eXMB-build -S . -DCMAKE_INSTALL_PREFIX="..\eXMB-ReleaseOut" -DCMAKE_PREFIX_PATH="..\qt_622_msvc2019_64" -DCMAKE_SYSTEM_VERSION="10.0.22000.0"
+        cmake --build ..\eXMB-build --target eXMB --config Release --parallel 2
+        cmake --install ..\eXMB-build
     - name: Upload build artifact
       uses: actions/upload-artifact@v2
       with:
         name: win32-qt622-msvc2019_64
-        path: out/
+        path: ../eXMB-ReleaseOut
