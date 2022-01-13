@@ -83,7 +83,7 @@ jobs:
         ${env:EXMB_RELEASE_PATH} = (Resolve-Path ..\eXMB-ReleaseOut).Path
         ${env:QT6_PREFIX} = (Resolve-Path ..\Qt\6.2.2\msvc2019_64).Path
         ${env:PATH} += ";${env:QT6_PREFIX}\bin"
-        windeployqt --release --no-translations ${env:EXMB_RELEASE_PATH}
+        windeployqt --release --no-translations ${env:EXMB_RELEASE_PATH}/bin/eXMB.exe
     - name: Upload build artifact
       uses: actions/upload-artifact@v2
       with:
