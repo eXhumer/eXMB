@@ -39,6 +39,7 @@ jobs:
         Expand-Archive NASM.zip
         ${env:NASM_PATH} = (Resolve-Path ./NASM/nasm-2.15.05/).Path
         ${env:PATH} += ";${env:NASM_PATH}"
+        cd ./openssl/
         perl Configure --prefix=${env:OPENSSL_PREFIX} VC-WIN64A
         nmake
         nmake install
