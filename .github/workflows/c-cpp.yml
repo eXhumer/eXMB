@@ -1,0 +1,34 @@
+name: Build on Windows
+on:
+  push:
+    branches: [ qt6-cmake ]
+  pull_request:
+    branches: [ qt6-cmake ]
+jobs:
+  build-application:
+    runs-on: windows-latest
+    steps:
+    - uses: actions/checkout@qt6-cmake
+    - name: Clone Qt 6.2.2
+      run: git clone git://code.qt.io/qt/qt5.git qt622 --branch=6.2.2
+    - name: Initialize Qt Repository
+      run: |
+        cd qt622
+        perl init-repository --module-subset=qtbase,qtnetworkauth
+    - name: Configure Qt Repository
+      run: |
+        mkdir ../qt622-build
+        cd ../qt622-build
+        ../qt622/configure.bat -prefix C:\Qt\6.2.2\msvc2019_64 -release -platform win32-msvc
+    - name: Build Qt6
+      run: |
+        cmake --build .
+    - name: Install Qt6 to prefix
+      run: |
+        cmake --install .
+    - name: Configure Project
+      run: |
+        cd ../
+        cmake -B build -S . -DCMAKE_PREFIX_PATH=C:\Qt\6.2.2\msvc2019_64 -CMAKE_INSTALL_PREFIX=out -DCMAKE_SYSTEM_VERSION=10.0.22000.0
+    - name: Build eXMB
+      run: cmake --build build build -S . -DCMAKE_PREFIX_PATH=C:\Qt\6.2.2\msvc2019_64 -CMAKE_INSTALL_PREFIX=out -DCMAKE_SYSTEM_VERSION=10.0.22000.0
