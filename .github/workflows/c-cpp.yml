@@ -11,11 +11,10 @@ jobs:
     - uses: actions/checkout@v2
     - name: Clone Qt 6.2.2
       run: |
-        ls .
+        cd ..\
         git clone git://code.qt.io/qt/qt5.git qt622 --branch=6.2.2
     - name: Initialize Qt Repository
       run: |
-        ls .
         cd qt622
         perl init-repository --module-subset=qtbase,qtnetworkauth
     - name: Configure Qt Repository
@@ -31,7 +30,7 @@ jobs:
         cmake --install .
     - name: Configure Project
       run: |
-        cd ..\
+        cd ..\eXMB\
         cmake -B build -S . -DCMAKE_PREFIX_PATH=C:\Qt\6.2.2\msvc2019_64 -CMAKE_INSTALL_PREFIX=out -DCMAKE_SYSTEM_VERSION=10.0.22000.0
     - name: Build eXMB
       run: cmake --build build --target eXMB --config Release
