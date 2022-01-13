@@ -17,9 +17,9 @@ jobs:
         perl init-repository --module-subset=qtbase,qtnetworkauth
     - name: Configure Qt Repository
       run: |
-        mkdir ../qt622-build
-        cd ../qt622-build
-        .\..\qt622\configure.bat -prefix C:\Qt\6.2.2\msvc2019_64 -release -platform win32-msvc
+        mkdir ..\qt622-build
+        cd ..\qt622-build
+        ..\qt622\configure.bat -prefix C:\Qt\6.2.2\msvc2019_64 -release -platform win32-msvc
     - name: Build Qt6
       run: |
         cmake --build .
@@ -28,7 +28,7 @@ jobs:
         cmake --install .
     - name: Configure Project
       run: |
-        cd ../
+        cd ..\
         cmake -B build -S . -DCMAKE_PREFIX_PATH=C:\Qt\6.2.2\msvc2019_64 -CMAKE_INSTALL_PREFIX=out -DCMAKE_SYSTEM_VERSION=10.0.22000.0
     - name: Build eXMB
-      run: cmake --build build build -S . -DCMAKE_PREFIX_PATH=C:\Qt\6.2.2\msvc2019_64 -CMAKE_INSTALL_PREFIX=out -DCMAKE_SYSTEM_VERSION=10.0.22000.0
+      run: cmake --build build --target eXMB --config Release
