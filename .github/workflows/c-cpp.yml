@@ -33,7 +33,7 @@ jobs:
       run: |
         $VSWHERE_PATH = "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe"
         $DEV_CMD_ARGS = "-arch=amd64", "-host_arch=amd64", "-no_logo"
-        $MSVC2019_VSWHERE_INSTANCE_ID_ARGS = "-products", "*", "-requires", "Microsoft.VisualStudio.Component.VC.Tools.x86.x64", "-version", "[16.0,17.0)", "-property", "installationPath"
+        $MSVC2019_VSWHERE_INSTALL_PATH_ARGS = "-products", "*", "-requires", "Microsoft.VisualStudio.Component.VC.Tools.x86.x64", "-version", "[16.0,17.0)", "-property", "installationPath"
         $MSVC2019_INSTALL_PATH = & $VSWHERE_PATH $MSVC2019_VSWHERE_INSTALL_PATH_ARGS
         $MSVC2019_DEVSHELL_PATH = "$MSVC2019_INSTALL_PATH\Common7\Tools\Microsoft.VisualStudio.DevShell.dll"
         Import-Module $MSVC2019_DEVSHELL_PATH
