@@ -27,7 +27,7 @@ jobs:
         mkdir ..\qt622-build
         cd ..\qt622-build
         ..\qt622\configure.bat -prefix D:\a\eXMB\qt_622_msvc2019_64 -release -platform win32-msvc
-        cmake --build .
+        cmake --build . --parallel 2
         cmake --install .
     - name: Build eXMB
       run: |
@@ -39,7 +39,7 @@ jobs:
         Import-Module $MSVC2019_DEVSHELL_PATH
         Enter-VsDevShell -VsInstallPath "$MSVC2019_INSTALL_PATH" -DevCmdArguments ($DEV_CMD_ARGS -join " ")
         cmake -B build -S . -DCMAKE_PREFIX_PATH=D:\a\eXMB\qt_622_msvc2019_64 -CMAKE_INSTALL_PREFIX=out -DCMAKE_SYSTEM_VERSION=10.0.22000.0
-        cmake --build build --target eXMB --config Release
+        cmake --build build --target eXMB --config Release --parallel 2
         cmake --install build
     - uses: actions/upload-artifact@v2
       with:
