@@ -111,12 +111,12 @@ jobs:
         perl init-repository --module-subset=qtbase,qtnetworkauth,qttools
     - name: Build Qt 6.2.2
       run: |
-        cmake -B ../qt622-build -S ../qt622 -DCMAKE_INSTALL_PREFIX="../Qt/6.2.2/msvc2019_64" -DQT_QMAKE_TARGET_MKSPEC="linux-g++" -DCMAKE_BUILD_TYPE=Release -G Ninja
+        cmake -B ../qt622-build -S ../qt622 -DCMAKE_INSTALL_PREFIX="../Qt/6.2.2/gcc_64" -DQT_QMAKE_TARGET_MKSPEC="linux-g++" -DCMAKE_BUILD_TYPE=Release -G Ninja
         cmake --build ../qt622-build
         cmake --install ../qt622-build
     - name: Build eXMB
       run: |
-        cmake -B ../eXMB-build -S . -DCMAKE_INSTALL_PREFIX="../eXMB-ReleaseOut" -DCMAKE_SYSTEM_VERSION="10.0.22000.0"
+        CMAKE_PREFIX_PATH=../Qt/6.2.2/gcc_64 cmake -B ../eXMB-build -S . -DCMAKE_INSTALL_PREFIX="../eXMB-ReleaseOut" -DCMAKE_SYSTEM_VERSION="10.0.22000.0"
         cmake --build ../eXMB-build --target eXMB --config Release
         cmake --install ../eXMB-build
         echo "EXMB_RELEASE_PATH=$(cd ../eXMB-ReleaseOut; pwd)" >> $GITHUB_ENV
