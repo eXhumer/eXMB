@@ -5,7 +5,7 @@ on:
   pull_request:
     branches: [ qt6-cmake ]
 jobs:
-  build-qt622-msvc2019_64:
+  win32-qt622-msvc2019_64:
     runs-on: windows-latest
     steps:
     - name: Checkout project source code
@@ -91,4 +91,36 @@ jobs:
       uses: actions/upload-artifact@v2
       with:
         name: win32-qt622-msvc2019_64
+        path: ${{ env.EXMB_RELEASE_PATH }}
+  ubuntu-qt622-gcc_64:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout project source code
+      uses: actions/checkout@v2
+    - name: Checkout project submodules
+      run: git submodule update --init --recursive
+    - name: Install Qt 6.2.2 build requirements
+      run: |
+        sudo apt-get install build-essential libgl1-mesa-dev libssl-dev libfontconfig1-dev libfreetype6-dev libx11-dev libx11-xcb-dev libxext-dev libxfixes-dev libxi-dev libxrender-dev libxcb1-dev libxcb-glx0-dev libxcb-keysyms1-dev libxcb-image0-dev libxcb-shm0-dev libxcb-icccm4-dev libxcb-sync-dev libxcb-xfixes0-dev libxcb-shape0-dev libxcb-randr0-dev libxcb-render-util0-dev libxcb-util-dev libxcb-xinerama0-dev libxcb-xkb-dev libxkbcommon-dev libxkbcommon-x11-dev ninja-build
+    - name: Get Qt 6.2.2 Source Code
+      run: |
+        cd ../
+        git clone git://code.qt.io/qt/qt5.git qt622 --branch=6.2.2
+        cd ./qt622
+        perl init-repository --module-subset=qtbase,qtnetworkauth,qttools
+    - name: Build Qt 6.2.2
+      run: |
+        cmake -B ../qt622-build -S ../qt622 -DCMAKE_INSTALL_PREFIX="../Qt/6.2.2/msvc2019_64" -DQT_QMAKE_TARGET_MKSPEC="linux-g++"" -DCMAKE_BUILD_TYPE=Release
+        cmake --build ../qt622-build --parallel
+        cmake --install ../qt622-build
+    - name: Build eXMB
+      run: |
+        cmake -B ../eXMB-build -S . -DCMAKE_INSTALL_PREFIX="../eXMB-ReleaseOut" -DCMAKE_SYSTEM_VERSION="10.0.22000.0"
+        cmake --build ../eXMB-build --target eXMB --config Release --parallel
+        cmake --install ../eXMB-build
+        echo "EXMB_RELEASE_PATH=$(cd ../eXMB-ReleaseOut; pwd)" >> $GITHUB_ENV
+    - name: Upload build artifact
+      uses: actions/upload-artifact@v2
+      with:
+        name: ubuntu-qt622-gcc_64
         path: ${{ env.EXMB_RELEASE_PATH }}
