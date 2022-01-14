@@ -18,7 +18,7 @@ jobs:
         git clone git://code.qt.io/qt/qt5.git qt622 --branch=6.2.2
         cd .\qt622
         perl init-repository --module-subset=qtbase,qtnetworkauth,qttools
-    - name: Build OpenSSL 1.1.1m
+    - name: Build OpenSSL 1.1.1m (NASM 2.15.05 | MSVC2019-x64)
       run: |
         $VSWHERE_PATH = "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe"
         $DEV_CMD_ARGS = "-arch=amd64", "-host_arch=amd64", "-no_logo"
@@ -45,7 +45,7 @@ jobs:
         perl Configure --openssldir=${env:OPENSSL_DIR} --prefix=${env:OPENSSL_PREFIX} VC-WIN64A
         nmake
         nmake install
-    - name: Build Qt 6.2.2
+    - name: Build Qt 6.2.2 (OpenSSL 1.1.1m | MSVC2019-x64)
       run: |
         $VSWHERE_PATH = "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe"
         $DEV_CMD_ARGS = "-arch=amd64", "-host_arch=amd64", "-no_logo"
@@ -63,7 +63,7 @@ jobs:
         cmake -B "${env:QT6_BUILD_PATH}" -S "${env:QT6_SRC}" -DOPENSSL_ROOT_DIR="${env:OPENSSL_PREFIX}" -DCMAKE_INSTALL_PREFIX="${env:QT6_PREFIX}" -DQT_QMAKE_TARGET_MKSPEC="win32-msvc" -DCMAKE_CXX_COMPILER=cl -DCMAKE_BUILD_TYPE=Release -G Ninja
         cmake --build "${env:QT6_BUILD_PATH}" --parallel
         cmake --install "${env:QT6_BUILD_PATH}"
-    - name: Build eXMB
+    - name: Build eXMB (Qt 6.2.2 | OpenSSL-1.1.1m | MSVC2019-x64)
       run: |
         $VSWHERE_PATH = "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe"
         $DEV_CMD_ARGS = "-arch=amd64", "-host_arch=amd64", "-no_logo"
@@ -87,7 +87,20 @@ jobs:
       run: |
         ${env:EXMB_RELEASE_PATH} = (Resolve-Path ..\eXMB-ReleaseOut).Path
         ${env:QT6_PREFIX} = (Resolve-Path ..\Qt\6.2.2\msvc2019_64).Path
-        & "${env:QT6_PREFIX}\bin\windeployqt.exe" --release --no-translations ${env:EXMB_RELEASE_PATH}/bin/eXMB.exe
+        $VSWHERE_PATH = "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe"
+        $DEV_CMD_ARGS = "-arch=amd64", "-host_arch=amd64", "-no_logo"
+        $MSVC2019_VSWHERE_INSTALL_PATH_ARGS = "-products", "*", "-requires", "Microsoft.VisualStudio.Component.VC.Tools.x86.x64", "-version", "[16.0,17.0)", "-property", "installationPath"
+        $MSVC2019_INSTALL_PATH = & $VSWHERE_PATH $MSVC2019_VSWHERE_INSTALL_PATH_ARGS
+        $MSVC2019_DEVSHELL_PATH = "$MSVC2019_INSTALL_PATH\Common7\Tools\Microsoft.VisualStudio.DevShell.dll"
+        Import-Module $MSVC2019_DEVSHELL_PATH
+        Enter-VsDevShell -VsInstallPath "$MSVC2019_INSTALL_PATH" -DevCmdArguments ($DEV_CMD_ARGS -join " ")
+        & "${env:QT6_PREFIX}\bin\windeployqt.exe" --release --no-translations ${env:EXMB_RELEASE_PATH}\bin\eXMB.exe
+    - name: Deploy OpenSSL shared libraries with eXMB
+      run: |
+        ${env:EXMB_RELEASE_PATH} = (Resolve-Path ..\eXMB-ReleaseOut).Path
+        ${env:OPENSSL_PREFIX} = (Resolve-Path ..\OpenSSL-1.1.1m).Path
+        cp ${env:OPENSSL_PREFIX}\bin\libcrypto-1_1-x64.dll ${env:EXMB_RELEASE_PATH}\bin
+        cp ${env:OPENSSL_PREFIX}\bin\libssl-1_1-x64.dll ${env:EXMB_RELEASE_PATH}\bin
     - name: Upload build artifact
       uses: actions/upload-artifact@v2
       with:
