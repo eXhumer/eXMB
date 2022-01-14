@@ -88,6 +88,7 @@ void AppWindow::setupCentralWidget() {
   QVBoxLayout *authLayout = new QVBoxLayout;
   QHBoxLayout *authStateLayout = new QHBoxLayout;
   QHBoxLayout *postLayout = new QHBoxLayout;
+  QHBoxLayout *postOptsLayout = new QHBoxLayout;
   QVBoxLayout *postHostLayout = new QVBoxLayout;
   QVBoxLayout *postDetailsLayout = new QVBoxLayout;
   QVBoxLayout *centralLayout = new QVBoxLayout;
@@ -106,11 +107,15 @@ void AppWindow::setupCentralWidget() {
   postHostLayout->addWidget(m_sjaRB);
   postHostLayout->addWidget(m_swoRB);
   postLayout->addLayout(postHostLayout);
+  postOptsLayout->addWidget(m_postNSFWCB);
+  postOptsLayout->addWidget(m_postSRCB);
+  postOptsLayout->addWidget(m_postSpoilerCB);
   postDetailsLayout->addWidget(m_titleLE);
   postDetailsLayout->addWidget(m_subredditLE);
   postDetailsLayout->addWidget(m_flairLE);
   postDetailsLayout->addWidget(m_videoSelectBtn);
   postDetailsLayout->addWidget(m_uploadProgress);
+  postDetailsLayout->addLayout(postOptsLayout);
   postLayout->addLayout(postDetailsLayout, 1);
   authStateLayout->addWidget(m_authStateLE);
   authStateLayout->addWidget(m_permanentCB);
@@ -241,6 +246,9 @@ void AppWindow::setupWidgets() {
   m_sffRB = new QRadioButton("Streamff");
   m_sjaRB = new QRadioButton("Streamja");
   m_swoRB = new QRadioButton("Streamwo");
+  m_postNSFWCB = new QCheckBox("NSFW?");
+  m_postSRCB = new QCheckBox("Send Replies?");
+  m_postSpoilerCB = new QCheckBox("Spoiler?");
   m_authStateLE = new QLineEdit;
   m_authStateLE->setAlignment(Qt::AlignHCenter);
   m_authStateLE->setReadOnly(true);
@@ -415,7 +423,9 @@ void AppWindow::onVideoFileSelectAndUpload() {
                 Qt::UniqueConnection);
 
             m_red->postUrl(videoLink, m_titleLE->text(), m_subredditLE->text(),
-                           m_flairLE->text());
+                           m_flairLE->text(), m_postSRCB->isChecked(),
+                           m_postNSFWCB->isChecked(),
+                           m_postSpoilerCB->isChecked());
           }
         },
         Qt::UniqueConnection);
@@ -473,7 +483,9 @@ void AppWindow::onVideoFileSelectAndUpload() {
                 Qt::UniqueConnection);
 
             m_red->postUrl(videoLink, m_titleLE->text(), m_subredditLE->text(),
-                           m_flairLE->text());
+                           m_flairLE->text(), m_postSRCB->isChecked(),
+                           m_postNSFWCB->isChecked(),
+                           m_postSpoilerCB->isChecked());
           }
         },
         Qt::UniqueConnection);
@@ -531,7 +543,9 @@ void AppWindow::onVideoFileSelectAndUpload() {
                 Qt::UniqueConnection);
 
             m_red->postUrl(videoLink, m_titleLE->text(), m_subredditLE->text(),
-                           m_flairLE->text());
+                           m_flairLE->text(), m_postSRCB->isChecked(),
+                           m_postNSFWCB->isChecked(),
+                           m_postSpoilerCB->isChecked());
           }
         },
         Qt::UniqueConnection);
@@ -589,7 +603,9 @@ void AppWindow::onVideoFileSelectAndUpload() {
                 Qt::UniqueConnection);
 
             m_red->postUrl(videoLink, m_titleLE->text(), m_subredditLE->text(),
-                           m_flairLE->text());
+                           m_flairLE->text(), m_postSRCB->isChecked(),
+                           m_postNSFWCB->isChecked(),
+                           m_postSpoilerCB->isChecked());
           }
         },
         Qt::UniqueConnection);
@@ -648,7 +664,9 @@ void AppWindow::onVideoFileSelectAndUpload() {
                 Qt::UniqueConnection);
 
             m_red->postUrl(videoLink, m_titleLE->text(), m_subredditLE->text(),
-                           m_flairLE->text());
+                           m_flairLE->text(), m_postSRCB->isChecked(),
+                           m_postNSFWCB->isChecked(),
+                           m_postSpoilerCB->isChecked());
           }
         },
         Qt::UniqueConnection);
@@ -706,7 +724,9 @@ void AppWindow::onVideoFileSelectAndUpload() {
                 Qt::UniqueConnection);
 
             m_red->postUrl(videoLink, m_titleLE->text(), m_subredditLE->text(),
-                           m_flairLE->text());
+                           m_flairLE->text(), m_postSRCB->isChecked(),
+                           m_postNSFWCB->isChecked(),
+                           m_postSpoilerCB->isChecked());
           }
         },
         Qt::UniqueConnection);

@@ -56,7 +56,7 @@ private:
   eXVHP::Service::Streamff *m_sff;
   eXVHP::Service::Streamja *m_sja;
   eXVHP::Service::Streamwo *m_swo;
-  QCheckBox *m_permanentCB;
+  QCheckBox *m_permanentCB, *m_postNSFWCB, *m_postSRCB, *m_postSpoilerCB;
   QGroupBox *m_authGB, *m_postGB;
   QLineEdit *m_subredditLE, *m_titleLE, *m_flairLE, *m_authStateLE;
   QProgressBar *m_uploadProgress;
