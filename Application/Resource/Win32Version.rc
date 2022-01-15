@@ -1,3 +1,4 @@
+IDI_ICON1               ICON    "AppLogo.ico"
 #include <windows.h>
 #include "AppConfig.hxx"
 

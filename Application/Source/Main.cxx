@@ -21,6 +21,8 @@
 
 int main(int argc, char **argv) {
   QApplication app(argc, argv);
+  QIcon icon(":/AppLogo.png");
+  app.setWindowIcon(icon);
   app.setApplicationName(APP_NAME);
   app.setOrganizationName(APP_ORGANIZATION);
   app.setApplicationVersion(APP_VERSION);

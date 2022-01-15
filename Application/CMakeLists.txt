@@ -15,6 +15,7 @@ add_executable(
 ${PROJECT_NAME}
     ${APP_MOC}
     ${APP_RCC}
+    Resource/AppLogo.ico
     Source/AppWindow.cxx
     Source/Main.cxx
 )
