@@ -18,8 +18,16 @@ ${PROJECT_NAME}
     Source/AppWindow.cxx
     Source/Main.cxx
 )
-
+    
 if(WIN32)
+    configure_file(Win32Version.hxx.in Win32Version.hxx)
+
+    target_sources(
+    ${PROJECT_NAME}
+        PRIVATE
+            Resource/Win32Version.rc
+    )
+
     target_link_libraries(
     ${PROJECT_NAME}
         PRIVATE
@@ -31,7 +39,7 @@ if(WIN32)
         PROPERTIES
             WIN32_EXECUTABLE TRUE
     )
-endif()
+endif(WIN32)
 
 target_include_directories(
 ${PROJECT_NAME}
