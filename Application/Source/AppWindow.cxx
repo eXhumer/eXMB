@@ -172,6 +172,9 @@ void AppWindow::setupMenuBar() {
             "\n\nReddit media poster via external media hosting "
             "platforms.\n\nCopyright (C) 2022 - eXhumer",
         QMessageBox::Ok, this);
+    QIcon icon = aboutMsgBox->windowIcon();
+    QSize size = icon.actualSize(QSize(64, 64));
+    aboutMsgBox->setIconPixmap(icon.pixmap(size));
 #ifdef WIN32
     SetDarkModeStatus(m_darkMode, HWND(aboutMsgBox->winId()));
 
