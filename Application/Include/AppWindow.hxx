@@ -23,12 +23,7 @@ class Reddit;
 } // namespace eXRC::Service
 
 namespace eXVHP::Service {
-class JustStreamLive;
-class Mixture;
-class Streamable;
-class Streamff;
-class Streamja;
-class Streamwo;
+class MediaService;
 } // namespace eXVHP::Service
 
 #include <QCheckBox>
@@ -50,12 +45,7 @@ private:
 #endif // WIN32
   QDir m_appDataDir;
   eXRC::Service::Reddit *m_red;
-  eXVHP::Service::JustStreamLive *m_jsl;
-  eXVHP::Service::Mixture *m_mix;
-  eXVHP::Service::Streamable *m_sab;
-  eXVHP::Service::Streamff *m_sff;
-  eXVHP::Service::Streamja *m_sja;
-  eXVHP::Service::Streamwo *m_swo;
+  eXVHP::Service::MediaService *m_media;
   QCheckBox *m_permanentCB, *m_postNSFWCB, *m_postSRCB, *m_postSpoilerCB;
   QGroupBox *m_authGB, *m_postGB;
   QLineEdit *m_subredditLE, *m_titleLE, *m_flairLE, *m_authStateLE;
