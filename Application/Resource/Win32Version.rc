@@ -1,24 +1,24 @@
 #include <windows.h>
-#include "Win32Version.hxx"
+#include "AppConfig.hxx"
 
 VS_VERSION_INFO VERSIONINFO
-FILEVERSION     VER_FILEVERSION
-PRODUCTVERSION  VER_PRODUCTVERSION
+FILEVERSION     APP_WIN32_VERSION
+PRODUCTVERSION  APP_WIN32_VERSION
 BEGIN
     BLOCK "StringFileInfo"
     BEGIN
         BLOCK "040904E4"
         BEGIN
-            VALUE "CompanyName",        VER_COMPANYNAME_STR
-            VALUE "FileDescription",    VER_FILEDESCRIPTION_STR
-            VALUE "FileVersion",        VER_FILEVERSION_STR
-            VALUE "InternalName",       VER_INTERNALNAME_STR
-            VALUE "LegalCopyright",     VER_LEGALCOPYRIGHT_STR
-            VALUE "LegalTrademarks1",   VER_LEGALTRADEMARKS1_STR
-            VALUE "LegalTrademarks2",   VER_LEGALTRADEMARKS2_STR
-            VALUE "OriginalFilename",   VER_ORIGINALFILENAME_STR
-            VALUE "ProductName",        VER_PRODUCTNAME_STR
-            VALUE "ProductVersion",     VER_PRODUCTVERSION_STR
+            VALUE "CompanyName",        APP_ORGANIZATION
+            VALUE "FileDescription",    APP_NAME
+            VALUE "FileVersion",        APP_WIN32_FILEVERSION_STR
+            VALUE "InternalName",       APP_NAME
+            VALUE "LegalCopyright",     APP_LEGALCOPYRIGHT
+            VALUE "LegalTrademarks1",   APP_LEGALTRADEMARKS1
+            VALUE "LegalTrademarks2",   APP_LEGALTRADEMARKS2
+            VALUE "OriginalFilename",   APP_ORIGINAL_NAME
+            VALUE "ProductName",        APP_NAME
+            VALUE "ProductVersion",     APP_WIN32_PRODUCTVERSION_STR
         END
     END
 

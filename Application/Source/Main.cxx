@@ -22,6 +22,7 @@
 int main(int argc, char **argv) {
   QApplication app(argc, argv);
   app.setApplicationName(APP_NAME);
+  app.setOrganizationName(APP_ORGANIZATION);
   app.setApplicationVersion(APP_VERSION);
   AppWindow window("bnPnumDqM7YlDueRSzZCDw");
   window.show();

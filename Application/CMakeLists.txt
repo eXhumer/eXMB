@@ -20,8 +20,6 @@ ${PROJECT_NAME}
 )
     
 if(WIN32)
-    configure_file(Win32Version.hxx.in Win32Version.hxx)
-
     target_sources(
     ${PROJECT_NAME}
         PRIVATE
