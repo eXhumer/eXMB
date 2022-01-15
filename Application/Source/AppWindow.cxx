@@ -369,9 +369,10 @@ void AppWindow::onVideoFileSelectAndUpload() {
     return;
 
   QFile *videoFile = new QFile(videoFilePath);
+  QObject *videoCtx = new QObject;
 
   connect(
-      m_media, &eXVHP::Service::MediaService::mediaUploadProgress, this,
+      m_media, &eXVHP::Service::MediaService::mediaUploadProgress, videoCtx,
       [this, videoFile](QFile *vidFile, qint64 bytesSent, qint64 bytesTotal) {
         if (videoFile == vidFile) {
           m_uploadProgress->setValue(bytesSent);
@@ -381,29 +382,32 @@ void AppWindow::onVideoFileSelectAndUpload() {
       Qt::UniqueConnection);
 
   connect(
-      m_media, &eXVHP::Service::MediaService::mediaUploaded, this,
-      [this, videoFile](QFile *vidFile, const QString &videoId,
-                        const QString &videoLink) {
+      m_media, &eXVHP::Service::MediaService::mediaUploaded, videoCtx,
+      [this, videoCtx, videoFile](QFile *vidFile, const QString &videoId,
+                                  const QString &videoLink) {
         if (videoFile == vidFile) {
           connect(
-              m_red, &eXRC::Service::Reddit::postedUrl, this,
-              [this, videoLink](const QString &postUrl,
-                                const QString &redditUrl) {
+              m_red, &eXRC::Service::Reddit::postedUrl, videoCtx,
+              [this, videoCtx, videoLink](const QString &postUrl,
+                                          const QString &redditUrl) {
                 if (postUrl == videoLink) {
                   QMessageBox::information(this, "Video Posted Successfully!",
                                            "Posted <a href=\"" + postUrl +
                                                "\">Video</a> to <a href=\"" +
                                                redditUrl + "\">Reddit</a>!");
+                  videoCtx->deleteLater();
                 }
               },
               Qt::UniqueConnection);
           connect(
-              m_red, &eXRC::Service::Reddit::postUrlError, this,
-              [this, videoLink](const QString &postUrl, const QString &error) {
+              m_red, &eXRC::Service::Reddit::postUrlError, videoCtx,
+              [this, videoCtx, videoLink](const QString &postUrl,
+                                          const QString &error) {
                 if (postUrl == videoLink) {
                   QMessageBox::warning(
                       this, "Reddit Media Post Error!",
                       "Error while posting media link to Reddit!\n" + error);
+                  videoCtx->deleteLater();
                 }
               },
               Qt::UniqueConnection);
@@ -417,10 +421,11 @@ void AppWindow::onVideoFileSelectAndUpload() {
       Qt::UniqueConnection);
 
   connect(
-      m_media, &eXVHP::Service::MediaService::mediaUploadError, this,
-      [this, videoFile](QFile *vidFile, const QString &error) {
+      m_media, &eXVHP::Service::MediaService::mediaUploadError, videoCtx,
+      [this, videoCtx, videoFile](QFile *vidFile, const QString &error) {
         if (videoFile == vidFile) {
           QMessageBox::warning(this, "Media Upload Error", error);
+          videoCtx->deleteLater();
         }
       },
       Qt::UniqueConnection);
