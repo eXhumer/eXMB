@@ -46,6 +46,20 @@ bool IsWindowsDarkMode(bool *ok = nullptr) {
       QSettings::NativeFormat);
   return currentTheme.value("AppsUseLightTheme").toUInt(ok) == 0;
 }
+
+void SetDarkModeStatus(bool useDarkMode, HWND winId) {
+  BOOL USE_DARK_MODE = useDarkMode;
+  DwmSetWindowAttribute(winId, DWMWINDOWATTRIBUTE::DWMWA_CAPTION_COLOR,
+                        USE_DARK_MODE ? &DARK_COLOR : &LIGHT_COLOR,
+                        sizeof(USE_DARK_MODE ? DARK_COLOR : LIGHT_COLOR));
+  DwmSetWindowAttribute(
+      winId, DWMWINDOWATTRIBUTE::DWMWA_TEXT_COLOR,
+      USE_DARK_MODE ? &DARK_TEXT_COLOR : &LIGHT_TEXT_COLOR,
+      sizeof(USE_DARK_MODE ? DARK_TEXT_COLOR : LIGHT_TEXT_COLOR));
+  DwmSetWindowAttribute(winId,
+                        DWMWINDOWATTRIBUTE::DWMWA_USE_IMMERSIVE_DARK_MODE,
+                        &USE_DARK_MODE, sizeof(USE_DARK_MODE));
+}
 #endif // WIN32
 
 AppWindow::AppWindow(const QString &redditClientId, QWidget *parent)
@@ -53,18 +67,7 @@ AppWindow::AppWindow(const QString &redditClientId, QWidget *parent)
                                QStandardPaths::AppDataLocation)) {
 #ifdef WIN32
   m_darkMode = IsWindowsDarkMode();
-  BOOL USE_DARK_MODE = m_darkMode;
-  BOOL SET_CAPTION_COLOR_SUCCESS = SUCCEEDED(DwmSetWindowAttribute(
-      HWND(winId()), DWMWINDOWATTRIBUTE::DWMWA_CAPTION_COLOR,
-      USE_DARK_MODE ? &DARK_COLOR : &LIGHT_COLOR,
-      sizeof(USE_DARK_MODE ? DARK_COLOR : LIGHT_COLOR)));
-  BOOL SET_TEXT_COLOR_SUCCESS = SUCCEEDED(DwmSetWindowAttribute(
-      HWND(winId()), DWMWINDOWATTRIBUTE::DWMWA_TEXT_COLOR,
-      USE_DARK_MODE ? &DARK_TEXT_COLOR : &LIGHT_TEXT_COLOR,
-      sizeof(USE_DARK_MODE ? DARK_TEXT_COLOR : LIGHT_TEXT_COLOR)));
-  BOOL USE_IMMERSIVE_DARK_MODE_SUCCESS = SUCCEEDED(DwmSetWindowAttribute(
-      HWND(winId()), DWMWINDOWATTRIBUTE::DWMWA_USE_IMMERSIVE_DARK_MODE,
-      &USE_DARK_MODE, sizeof(USE_DARK_MODE)));
+  SetDarkModeStatus(m_darkMode, HWND(winId()));
 #endif // WIN32
   QFile appQssFile(":/AppWindowDark.qss");
   appQssFile.open(QIODevice::ReadOnly);
@@ -102,9 +105,9 @@ void AppWindow::setupCentralWidget() {
   postHostLayout->addWidget(m_sjaRB);
   postHostLayout->addWidget(m_swoRB);
   postLayout->addLayout(postHostLayout);
-  postOptsLayout->addWidget(m_postNSFWCB);
-  postOptsLayout->addWidget(m_postSRCB);
-  postOptsLayout->addWidget(m_postSpoilerCB);
+  postOptsLayout->addWidget(m_postNSFWCB, 0, Qt::AlignHCenter);
+  postOptsLayout->addWidget(m_postSRCB, 0, Qt::AlignHCenter);
+  postOptsLayout->addWidget(m_postSpoilerCB, 0, Qt::AlignHCenter);
   postDetailsLayout->addWidget(m_titleLE);
   postDetailsLayout->addWidget(m_subredditLE);
   postDetailsLayout->addWidget(m_flairLE);
@@ -146,18 +149,7 @@ void AppWindow::setupCentralWidget() {
 
     if (darkMode != m_darkMode) {
       m_darkMode = darkMode;
-      BOOL USE_DARK_MODE = m_darkMode;
-      BOOL SET_CAPTION_COLOR_SUCCESS = SUCCEEDED(DwmSetWindowAttribute(
-          HWND(winId()), DWMWINDOWATTRIBUTE::DWMWA_CAPTION_COLOR,
-          USE_DARK_MODE ? &DARK_COLOR : &LIGHT_COLOR,
-          sizeof(USE_DARK_MODE ? DARK_COLOR : LIGHT_COLOR)));
-      BOOL SET_TEXT_COLOR_SUCCESS = SUCCEEDED(DwmSetWindowAttribute(
-          HWND(winId()), DWMWINDOWATTRIBUTE::DWMWA_TEXT_COLOR,
-          USE_DARK_MODE ? &DARK_TEXT_COLOR : &LIGHT_TEXT_COLOR,
-          sizeof(USE_DARK_MODE ? DARK_TEXT_COLOR : LIGHT_TEXT_COLOR)));
-      BOOL USE_IMMERSIVE_DARK_MODE_SUCCESS = SUCCEEDED(DwmSetWindowAttribute(
-          HWND(winId()), DWMWINDOWATTRIBUTE::DWMWA_USE_IMMERSIVE_DARK_MODE,
-          &USE_DARK_MODE, sizeof(USE_DARK_MODE)));
+      SetDarkModeStatus(m_darkMode, HWND(winId()));
     }
   });
   themeChangeTimer->start(1000);
@@ -174,10 +166,30 @@ void AppWindow::setupMenuBar() {
   QAction *aboutAct = helpMenu->addAction("About");
   QAction *aboutQtAct = helpMenu->addAction("About Qt");
   connect(aboutAct, &QAction::triggered, this, [this](bool checked) {
-    QMessageBox::about(this, "About",
-                       QString(APP_NAME) + " v" + QString(APP_VERSION) +
-                           "\n\nReddit media poster via external media hosting "
-                           "platforms.\n\nCopyright (C) 2022 - eXhumer");
+    QMessageBox *aboutMsgBox = new QMessageBox(
+        QMessageBox::NoIcon, "About",
+        QString(APP_NAME) + " v" + QString(APP_VERSION) +
+            "\n\nReddit media poster via external media hosting "
+            "platforms.\n\nCopyright (C) 2022 - eXhumer",
+        QMessageBox::Ok, this);
+#ifdef WIN32
+    SetDarkModeStatus(m_darkMode, HWND(aboutMsgBox->winId()));
+
+    QTimer *themeChangeTimer = new QTimer(aboutMsgBox);
+    bool darkMode = m_darkMode;
+    connect(themeChangeTimer, &QTimer::timeout, aboutMsgBox,
+            [this, aboutMsgBox, &darkMode]() {
+              bool newDarkMode = m_darkMode;
+
+              if (darkMode != newDarkMode) {
+                darkMode = newDarkMode;
+                SetDarkModeStatus(darkMode, HWND(aboutMsgBox->winId()));
+              }
+            });
+    themeChangeTimer->start(1000);
+#endif // WIN32
+    aboutMsgBox->exec();
+    aboutMsgBox->deleteLater();
   });
   connect(aboutQtAct, &QAction::triggered, this,
           [this](bool checked) { QMessageBox::aboutQt(this); });
