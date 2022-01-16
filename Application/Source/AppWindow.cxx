@@ -100,6 +100,7 @@ void AppWindow::setupCentralWidget() {
   postHostLayout->addWidget(new QLabel("Video Host"), 0, Qt::AlignHCenter);
   postHostLayout->addWidget(m_jslRB);
   postHostLayout->addWidget(m_mixRB);
+  postHostLayout->addWidget(m_redRB);
   postHostLayout->addWidget(m_sabRB);
   postHostLayout->addWidget(m_sffRB);
   postHostLayout->addWidget(m_sjaRB);
@@ -247,6 +248,7 @@ void AppWindow::setupWidgets() {
   m_videoSelectBtn = new QPushButton("Select Video File and Upload");
   m_jslRB = new QRadioButton("JustStreamLive");
   m_mixRB = new QRadioButton("Mixture");
+  m_redRB = new QRadioButton("Reddit");
   m_sabRB = new QRadioButton("Streamable");
   m_sffRB = new QRadioButton("Streamff");
   m_sjaRB = new QRadioButton("Streamja");
@@ -269,6 +271,7 @@ void AppWindow::enableWidgets() {
   m_videoSelectBtn->setEnabled(true);
   m_jslRB->setEnabled(true);
   m_mixRB->setEnabled(true);
+  m_redRB->setEnabled(true);
   m_sabRB->setEnabled(true);
   m_sffRB->setEnabled(true);
   m_sjaRB->setEnabled(true);
@@ -291,6 +294,7 @@ void AppWindow::disableWidgets() {
   m_videoSelectBtn->setDisabled(true);
   m_jslRB->setDisabled(true);
   m_mixRB->setDisabled(true);
+  m_redRB->setDisabled(true);
   m_sabRB->setDisabled(true);
   m_sffRB->setDisabled(true);
   m_sjaRB->setDisabled(true);
@@ -361,8 +365,9 @@ void AppWindow::onVideoFileSelectAndUpload() {
   }
 
   bool hostSelected = m_jslRB->isChecked() || m_mixRB->isChecked() ||
-                      m_sabRB->isChecked() || m_sffRB->isChecked() ||
-                      m_sjaRB->isChecked() || m_swoRB->isChecked();
+                      m_redRB->isChecked() || m_sabRB->isChecked() ||
+                      m_sffRB->isChecked() || m_sjaRB->isChecked() ||
+                      m_swoRB->isChecked();
 
   if (!hostSelected) {
     QMessageBox::warning(
@@ -376,7 +381,7 @@ void AppWindow::onVideoFileSelectAndUpload() {
   if (m_jslRB->isChecked())
     filter = "Supported Video Files (*.mkv *.mp4 *.webm)";
 
-  else if (m_sabRB->isChecked())
+  else if (m_redRB->isChecked() || m_sabRB->isChecked())
     filter = "Supported Video Files (*.mkv *.mp4)";
 
   else if (m_mixRB->isChecked() || m_sffRB->isChecked() ||
@@ -392,80 +397,131 @@ void AppWindow::onVideoFileSelectAndUpload() {
   QFile *videoFile = new QFile(videoFilePath);
   QObject *videoCtx = new QObject;
 
-  connect(
-      m_media, &eXVHP::Service::MediaService::mediaUploadProgress, videoCtx,
-      [this, videoFile](QFile *vidFile, qint64 bytesSent, qint64 bytesTotal) {
-        if (videoFile == vidFile) {
-          m_uploadProgress->setValue(bytesSent);
-          m_uploadProgress->setMaximum(bytesTotal);
-        }
-      },
-      Qt::UniqueConnection);
+  if (m_jslRB->isChecked() || m_mixRB->isChecked() || m_sabRB->isChecked() ||
+      m_sffRB->isChecked() || m_sjaRB->isChecked() || m_swoRB->isChecked()) {
+    connect(
+        m_media, &eXVHP::Service::MediaService::mediaUploadProgress, videoCtx,
+        [this, videoFile](QFile *vidFile, qint64 bytesSent, qint64 bytesTotal) {
+          if (videoFile == vidFile) {
+            m_uploadProgress->setValue(bytesSent);
+            m_uploadProgress->setMaximum(bytesTotal);
+          }
+        },
+        Qt::UniqueConnection);
 
-  connect(
-      m_media, &eXVHP::Service::MediaService::mediaUploaded, videoCtx,
-      [this, videoCtx, videoFile](QFile *vidFile, const QString &videoId,
-                                  const QString &videoLink) {
-        if (videoFile == vidFile) {
-          connect(
-              m_red, &eXRC::Service::Reddit::postedUrl, videoCtx,
-              [this, videoCtx, videoLink](const QString &postUrl,
-                                          const QString &redditUrl) {
-                if (postUrl == videoLink) {
-                  QMessageBox::information(this, "Video Posted Successfully!",
-                                           "Posted <a href=\"" + postUrl +
-                                               "\">Video</a> to <a href=\"" +
-                                               redditUrl + "\">Reddit</a>!");
-                  videoCtx->deleteLater();
-                }
-              },
-              Qt::UniqueConnection);
-          connect(
-              m_red, &eXRC::Service::Reddit::postUrlError, videoCtx,
-              [this, videoCtx, videoLink](const QString &postUrl,
-                                          const QString &error) {
-                if (postUrl == videoLink) {
-                  QMessageBox::warning(
-                      this, "Reddit Media Post Error!",
-                      "Error while posting media link to Reddit!\n" + error);
-                  videoCtx->deleteLater();
-                }
-              },
-              Qt::UniqueConnection);
+    connect(
+        m_media, &eXVHP::Service::MediaService::mediaUploaded, videoCtx,
+        [this, videoCtx, videoFile](QFile *vidFile, const QString &videoId,
+                                    const QString &videoLink) {
+          if (videoFile == vidFile) {
+            connect(
+                m_red, &eXRC::Service::Reddit::postedUrl, videoCtx,
+                [this, videoCtx, videoLink](const QString &postUrl,
+                                            const QString &redditUrl) {
+                  if (postUrl == videoLink) {
+                    QMessageBox::information(this, "Video Posted Successfully!",
+                                             "Posted <a href=\"" + postUrl +
+                                                 "\">Video</a> to <a href=\"" +
+                                                 redditUrl + "\">Reddit</a>!");
+                    videoCtx->deleteLater();
+                  }
+                },
+                Qt::UniqueConnection);
+            connect(
+                m_red, &eXRC::Service::Reddit::postUrlError, videoCtx,
+                [this, videoCtx, videoLink](const QString &postUrl,
+                                            const QString &error) {
+                  if (postUrl == videoLink) {
+                    QMessageBox::warning(
+                        this, "Reddit Media Post Error!",
+                        "Error while posting media link to Reddit!\n" + error);
+                    videoCtx->deleteLater();
+                  }
+                },
+                Qt::UniqueConnection);
 
-          m_red->postUrl(videoLink, m_titleLE->text(), m_subredditLE->text(),
-                         m_flairLE->text(), m_postSRCB->isChecked(),
-                         m_postNSFWCB->isChecked(),
-                         m_postSpoilerCB->isChecked());
-        }
-      },
-      Qt::UniqueConnection);
+            m_red->postUrl(videoLink, m_titleLE->text(), m_subredditLE->text(),
+                           m_flairLE->text(), m_postSRCB->isChecked(),
+                           m_postNSFWCB->isChecked(),
+                           m_postSpoilerCB->isChecked());
+          }
+        },
+        Qt::UniqueConnection);
 
-  connect(
-      m_media, &eXVHP::Service::MediaService::mediaUploadError, videoCtx,
-      [this, videoCtx, videoFile](QFile *vidFile, const QString &error) {
-        if (videoFile == vidFile) {
-          QMessageBox::warning(this, "Media Upload Error", error);
-          videoCtx->deleteLater();
-        }
-      },
-      Qt::UniqueConnection);
+    connect(
+        m_media, &eXVHP::Service::MediaService::mediaUploadError, videoCtx,
+        [this, videoCtx, videoFile](QFile *vidFile, const QString &error) {
+          if (videoFile == vidFile) {
+            QMessageBox::warning(this, "Media Upload Error", error);
+            videoCtx->deleteLater();
+          }
+        },
+        Qt::UniqueConnection);
 
-  if (m_jslRB->isChecked())
-    m_media->uploadJustStreamLive(videoFile);
+    if (m_jslRB->isChecked())
+      m_media->uploadJustStreamLive(videoFile);
 
-  else if (m_mixRB->isChecked())
-    m_media->uploadMixture(videoFile);
+    else if (m_mixRB->isChecked())
+      m_media->uploadMixture(videoFile);
 
-  else if (m_sabRB->isChecked())
-    m_media->uploadStreamable(videoFile, m_titleLE->text(), "us-east-1");
+    else if (m_sabRB->isChecked())
+      m_media->uploadStreamable(videoFile, m_titleLE->text(), "us-east-1");
 
-  else if (m_sffRB->isChecked())
-    m_media->uploadStreamff(videoFile);
+    else if (m_sffRB->isChecked())
+      m_media->uploadStreamff(videoFile);
 
-  else if (m_sjaRB->isChecked())
-    m_media->uploadStreamja(videoFile);
+    else if (m_sjaRB->isChecked())
+      m_media->uploadStreamja(videoFile);
 
-  else if (m_swoRB->isChecked())
-    m_media->uploadStreamwo(videoFile);
+    else if (m_swoRB->isChecked())
+      m_media->uploadStreamwo(videoFile);
+  } else {
+    connect(m_red, &eXRC::Service::Reddit::mediaUploadProgress, videoCtx,
+            [this, videoFile](QFile *progressFile, qint64 bytesSent,
+                              qint64 bytesTotal) {
+              if (progressFile == videoFile) {
+                m_uploadProgress->setValue(bytesSent);
+                m_uploadProgress->setMaximum(bytesTotal);
+              }
+            });
+
+    connect(
+        m_red, &eXRC::Service::Reddit::mediaUploadError, videoCtx,
+        [this, videoCtx, videoFile](QFile *errorFile, const QString &error) {
+          if (errorFile == videoFile) {
+            QMessageBox::warning(
+                this, "Error occurred while uploading media file", error);
+            videoCtx->deleteLater();
+          }
+        });
+
+    connect(
+        m_red, &eXRC::Service::Reddit::postMediaError, videoCtx,
+        [this, videoCtx, videoFile](QFile *errorFile, QFile *videoThumbnailFile,
+                                    const QString &error) {
+          if (errorFile == videoFile) {
+            QMessageBox::warning(
+                this, "Error occurred while post uploaded media file to Reddit",
+                error);
+            videoCtx->deleteLater();
+          }
+        });
+
+    connect(m_red, &eXRC::Service::Reddit::postedMedia, videoCtx,
+            [this, videoCtx, videoFile](QFile *mediaFile,
+                                        QFile *videoThumbnailFile,
+                                        const QString &postUrl) {
+              if (mediaFile == videoFile) {
+                QMessageBox::information(this, "Video Posted Successfully!",
+                                         "Posted to <a href=\"" + postUrl +
+                                             "\">Reddit</a>!");
+                videoCtx->deleteLater();
+              }
+            });
+
+    m_red->postMedia(videoFile, nullptr, m_titleLE->text(),
+                     m_subredditLE->text(), m_flairLE->text(),
+                     m_postSRCB->isChecked(), m_postNSFWCB->isChecked(),
+                     m_postSpoilerCB->isChecked());
+  }
 }
