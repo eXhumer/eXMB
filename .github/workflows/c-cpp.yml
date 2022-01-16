@@ -17,7 +17,7 @@ jobs:
         cd ..\
         git clone git://code.qt.io/qt/qt5.git qt622 --branch=6.2.2
         cd .\qt622
-        perl init-repository --module-subset=qtbase,qtnetworkauth,qttools
+        perl init-repository --module-subset=qtbase,qtnetworkauth,qttools,qtwebsockets
     - name: Build OpenSSL 1.1.1m (NASM 2.15.05 | MSVC2019-x64)
       run: |
         $VSWHERE_PATH = "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe"
@@ -121,7 +121,7 @@ jobs:
         cd ../
         git clone git://code.qt.io/qt/qt5.git qt622 --branch=6.2.2
         cd ./qt622
-        perl init-repository --module-subset=qtbase,qtnetworkauth,qttools
+        perl init-repository --module-subset=qtbase,qtnetworkauth,qttools,qtwebsockets
     - name: Build Qt 6.2.2
       run: |
         cmake -B ../qt622-build -S ../qt622 -DCMAKE_INSTALL_PREFIX="../Qt/6.2.2/gcc_64" -DQT_QMAKE_TARGET_MKSPEC="linux-g++" -DCMAKE_BUILD_TYPE=Release -G Ninja
