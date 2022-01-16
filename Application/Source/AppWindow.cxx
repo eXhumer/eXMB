@@ -273,6 +273,9 @@ void AppWindow::enableWidgets() {
   m_sffRB->setEnabled(true);
   m_sjaRB->setEnabled(true);
   m_swoRB->setEnabled(true);
+  m_postNSFWCB->setEnabled(true);
+  m_postSpoilerCB->setEnabled(true);
+  m_postSRCB->setEnabled(true);
 }
 
 void AppWindow::disableWidgets() {
@@ -292,6 +295,9 @@ void AppWindow::disableWidgets() {
   m_sffRB->setDisabled(true);
   m_sjaRB->setDisabled(true);
   m_swoRB->setDisabled(true);
+  m_postNSFWCB->setDisabled(true);
+  m_postSpoilerCB->setDisabled(true);
+  m_postSRCB->setDisabled(true);
 }
 
 void AppWindow::onAuthorize() {
