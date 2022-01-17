@@ -64,6 +64,8 @@ jobs:
         cmake --build "${env:QT6_BUILD_PATH}" --parallel
         cmake --install "${env:QT6_BUILD_PATH}"
     - name: Build eXMB (Qt 6.2.2 | OpenSSL-1.1.1m | MSVC2019-x64)
+      env:
+        REDDIT_CLIENT_ID: ${{ secrets.REDDIT_CLIENT_ID }}
       run: |
         $VSWHERE_PATH = "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe"
         $DEV_CMD_ARGS = "-arch=amd64", "-host_arch=amd64", "-no_logo"
@@ -79,7 +81,7 @@ jobs:
         mkdir ..\eXMB-ReleaseOut
         ${env:EXMB_RELEASE_PATH} = (Resolve-Path ..\eXMB-ReleaseOut).Path
         ${env:OPENSSL_PREFIX} = (Resolve-Path ..\OpenSSL-1.1.1m).Path
-        cmake -B "${env:EXMB_BUILD_PATH}" -S . -DCMAKE_INSTALL_PREFIX="${env:EXMB_RELEASE_PATH}" -DCMAKE_SYSTEM_VERSION="10.0.22000.0" -DOPENSSL_ROOT_DIR="${env:OPENSSL_PREFIX}"
+        cmake -B "${env:EXMB_BUILD_PATH}" -S . -DREDDIT_CLIENT_ID="${env:REDDIT_CLIENT_ID}" -DCMAKE_INSTALL_PREFIX="${env:EXMB_RELEASE_PATH}" -DCMAKE_SYSTEM_VERSION="10.0.22000.0" -DOPENSSL_ROOT_DIR="${env:OPENSSL_PREFIX}"
         cmake --build "${env:EXMB_BUILD_PATH}" --target eXMB --config Release --parallel
         cmake --install "${env:EXMB_BUILD_PATH}"
         echo "EXMB_RELEASE_PATH=${env:EXMB_RELEASE_PATH}" >> ${env:GITHUB_ENV}
@@ -128,8 +130,10 @@ jobs:
         cmake --build ../qt622-build
         cmake --install ../qt622-build
     - name: Build eXMB
+      env:
+        REDDIT_CLIENT_ID: ${{ secrets.REDDIT_CLIENT_ID }}
       run: |
-        CMAKE_PREFIX_PATH=../Qt/6.2.2/gcc_64 cmake -B ../eXMB-build -S . -DCMAKE_INSTALL_PREFIX="../eXMB-ReleaseOut" -DCMAKE_SYSTEM_VERSION="10.0.22000.0"
+        CMAKE_PREFIX_PATH=../Qt/6.2.2/gcc_64 cmake -B ../eXMB-build -S . -DREDDIT_CLIENT_ID="${env:REDDIT_CLIENT_ID}" -DCMAKE_INSTALL_PREFIX="../eXMB-ReleaseOut" -DCMAKE_SYSTEM_VERSION="10.0.22000.0"
         cmake --build ../eXMB-build --target eXMB --config Release
         cmake --install ../eXMB-build
         echo "EXMB_RELEASE_PATH=$(cd ../eXMB-ReleaseOut; pwd)" >> $GITHUB_ENV

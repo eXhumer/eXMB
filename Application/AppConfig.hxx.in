@@ -11,5 +11,6 @@
 #define APP_LEGALCOPYRIGHT            "Copyright © 2022 eXhumer"
 #define APP_LEGALTRADEMARKS1          "All Rights Reserved"
 #define APP_LEGALTRADEMARKS2          APP_LEGALTRADEMARKS1
+#define APP_REDDIT_CLIENT_ID          "@REDDIT_CLIENT_ID@"
 
 #endif // APP_CONFIG_HXX
