@@ -133,7 +133,7 @@ jobs:
       env:
         REDDIT_CLIENT_ID: ${{ secrets.REDDIT_CLIENT_ID }}
       run: |
-        CMAKE_PREFIX_PATH=../Qt/6.2.2/gcc_64 cmake -B ../eXMB-build -S . -DREDDIT_CLIENT_ID="${env:REDDIT_CLIENT_ID}" -DCMAKE_INSTALL_PREFIX="../eXMB-ReleaseOut" -DCMAKE_SYSTEM_VERSION="10.0.22000.0"
+        CMAKE_PREFIX_PATH=../Qt/6.2.2/gcc_64 cmake -B ../eXMB-build -S . -DREDDIT_CLIENT_ID="$REDDIT_CLIENT_ID" -DCMAKE_INSTALL_PREFIX="../eXMB-ReleaseOut" -DCMAKE_SYSTEM_VERSION="10.0.22000.0"
         cmake --build ../eXMB-build --target eXMB --config Release
         cmake --install ../eXMB-build
         echo "EXMB_RELEASE_PATH=$(cd ../eXMB-ReleaseOut; pwd)" >> $GITHUB_ENV
