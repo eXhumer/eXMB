@@ -99,12 +99,11 @@ void AppWindow::setupCentralWidget() {
 
   postHostLayout->addWidget(new QLabel("Video Host"), 0, Qt::AlignHCenter);
   postHostLayout->addWidget(m_jslRB);
-  postHostLayout->addWidget(m_mixRB);
   postHostLayout->addWidget(m_redRB);
   postHostLayout->addWidget(m_sabRB);
   postHostLayout->addWidget(m_sffRB);
+  postHostLayout->addWidget(m_sggRB);
   postHostLayout->addWidget(m_sjaRB);
-  postHostLayout->addWidget(m_swoRB);
   postLayout->addLayout(postHostLayout);
   postOptsLayout->addWidget(m_postNSFWCB, 0, Qt::AlignHCenter);
   postOptsLayout->addWidget(m_postSRCB, 0, Qt::AlignHCenter);
@@ -247,12 +246,11 @@ void AppWindow::setupWidgets() {
   m_revokeBtn = new QPushButton("Revoke");
   m_videoSelectBtn = new QPushButton("Select Video File and Upload");
   m_jslRB = new QRadioButton("JustStreamLive");
-  m_mixRB = new QRadioButton("Mixture");
   m_redRB = new QRadioButton("Reddit");
   m_sabRB = new QRadioButton("Streamable");
   m_sffRB = new QRadioButton("Streamff");
+  m_sggRB = new QRadioButton("Streamgg");
   m_sjaRB = new QRadioButton("Streamja");
-  m_swoRB = new QRadioButton("Streamwo");
   m_postNSFWCB = new QCheckBox("NSFW?");
   m_postSRCB = new QCheckBox("Send Replies?");
   m_postSpoilerCB = new QCheckBox("Spoiler?");
@@ -270,12 +268,11 @@ void AppWindow::enableWidgets() {
   m_revokeBtn->setEnabled(true);
   m_videoSelectBtn->setEnabled(true);
   m_jslRB->setEnabled(true);
-  m_mixRB->setEnabled(true);
   m_redRB->setEnabled(true);
   m_sabRB->setEnabled(true);
   m_sffRB->setEnabled(true);
+  m_sggRB->setEnabled(true);
   m_sjaRB->setEnabled(true);
-  m_swoRB->setEnabled(true);
   m_postNSFWCB->setEnabled(true);
   m_postSpoilerCB->setEnabled(true);
   m_postSRCB->setEnabled(true);
@@ -293,12 +290,11 @@ void AppWindow::disableWidgets() {
   m_revokeBtn->setDisabled(true);
   m_videoSelectBtn->setDisabled(true);
   m_jslRB->setDisabled(true);
-  m_mixRB->setDisabled(true);
   m_redRB->setDisabled(true);
   m_sabRB->setDisabled(true);
   m_sffRB->setDisabled(true);
+  m_sggRB->setDisabled(true);
   m_sjaRB->setDisabled(true);
-  m_swoRB->setDisabled(true);
   m_postNSFWCB->setDisabled(true);
   m_postSpoilerCB->setDisabled(true);
   m_postSRCB->setDisabled(true);
@@ -364,10 +360,9 @@ void AppWindow::onVideoFileSelectAndUpload() {
     return;
   }
 
-  bool hostSelected = m_jslRB->isChecked() || m_mixRB->isChecked() ||
-                      m_redRB->isChecked() || m_sabRB->isChecked() ||
-                      m_sffRB->isChecked() || m_sjaRB->isChecked() ||
-                      m_swoRB->isChecked();
+  bool hostSelected = m_jslRB->isChecked() || m_redRB->isChecked() ||
+                      m_sabRB->isChecked() || m_sffRB->isChecked() ||
+                      m_sggRB->isChecked() || m_sjaRB->isChecked();
 
   if (!hostSelected) {
     QMessageBox::warning(
@@ -384,8 +379,7 @@ void AppWindow::onVideoFileSelectAndUpload() {
   else if (m_redRB->isChecked() || m_sabRB->isChecked())
     filter = "Supported Video Files (*.mkv *.mp4)";
 
-  else if (m_mixRB->isChecked() || m_sffRB->isChecked() ||
-           m_sjaRB->isChecked() || m_swoRB->isChecked())
+  else if (m_sffRB->isChecked() || m_sggRB->isChecked() || m_sjaRB->isChecked())
     filter = "Supported Video Files (*.mp4)";
 
   QString videoFilePath = QFileDialog::getOpenFileName(
@@ -397,8 +391,8 @@ void AppWindow::onVideoFileSelectAndUpload() {
   QFile *videoFile = new QFile(videoFilePath);
   QObject *videoCtx = new QObject;
 
-  if (m_jslRB->isChecked() || m_mixRB->isChecked() || m_sabRB->isChecked() ||
-      m_sffRB->isChecked() || m_sjaRB->isChecked() || m_swoRB->isChecked()) {
+  if (m_jslRB->isChecked() || m_sabRB->isChecked() || m_sffRB->isChecked() ||
+      m_sggRB->isChecked() || m_sjaRB->isChecked()) {
     connect(
         m_media, &eXVHP::Service::MediaService::mediaUploadProgress, videoCtx,
         [this, videoFile](QFile *vidFile, qint64 bytesSent, qint64 bytesTotal) {
@@ -461,20 +455,17 @@ void AppWindow::onVideoFileSelectAndUpload() {
     if (m_jslRB->isChecked())
       m_media->uploadJustStreamLive(videoFile);
 
-    else if (m_mixRB->isChecked())
-      m_media->uploadMixture(videoFile);
-
     else if (m_sabRB->isChecked())
       m_media->uploadStreamable(videoFile, m_titleLE->text(), "us-east-1");
 
     else if (m_sffRB->isChecked())
       m_media->uploadStreamff(videoFile);
 
+    else if (m_sggRB->isChecked())
+      m_media->uploadStreamgg(videoFile);
+
     else if (m_sjaRB->isChecked())
       m_media->uploadStreamja(videoFile);
-
-    else if (m_swoRB->isChecked())
-      m_media->uploadStreamwo(videoFile);
   } else {
     connect(m_red, &eXRC::Service::Reddit::mediaUploadProgress, videoCtx,
             [this, videoFile](QFile *progressFile, qint64 bytesSent,
