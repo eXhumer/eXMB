@@ -5,18 +5,18 @@ on:
   pull_request:
     branches: [ qt6-cmake ]
 jobs:
-  win32-qt622-msvc2019_64:
+  win32-qt623-msvc2019_64:
     runs-on: windows-latest
     steps:
     - name: Checkout project source code
       uses: actions/checkout@v2
     - name: Checkout project submodules
       run: git submodule update --init --recursive
-    - name: Get Qt 6.2.2 Source Code
+    - name: Get Qt 6.2.3 Source Code
       run: |
         cd ..\
-        git clone git://code.qt.io/qt/qt5.git qt622 --branch=6.2.2
-        cd .\qt622
+        git clone git://code.qt.io/qt/qt5.git qt623 --branch=6.2.3
+        cd .\qt623
         perl init-repository --module-subset=qtbase,qtnetworkauth,qttools,qtwebsockets
     - name: Build OpenSSL 1.1.1m (NASM 2.15.05 | MSVC2019-x64)
       run: |
@@ -45,7 +45,7 @@ jobs:
         perl Configure --openssldir=${env:OPENSSL_DIR} --prefix=${env:OPENSSL_PREFIX} VC-WIN64A
         nmake
         nmake install
-    - name: Build Qt 6.2.2 (OpenSSL 1.1.1m | MSVC2019-x64)
+    - name: Build Qt 6.2.3 (OpenSSL 1.1.1m | MSVC2019-x64)
       run: |
         $VSWHERE_PATH = "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe"
         $DEV_CMD_ARGS = "-arch=amd64", "-host_arch=amd64", "-no_logo"
@@ -55,15 +55,15 @@ jobs:
         Import-Module $MSVC2019_DEVSHELL_PATH
         Enter-VsDevShell -VsInstallPath "$MSVC2019_INSTALL_PATH" -DevCmdArguments ($DEV_CMD_ARGS -join " ")
         ${env:OPENSSL_PREFIX} = (Resolve-Path ..\OpenSSL-1.1.1m).Path
-        mkdir ..\qt622-build
-        ${env:QT6_BUILD_PATH} = (Resolve-Path ..\qt622-build).Path
-        mkdir ..\Qt\6.2.2\msvc2019_64
-        ${env:QT6_PREFIX} = (Resolve-Path ..\Qt\6.2.2\msvc2019_64).Path
-        ${env:QT6_SRC} = (Resolve-Path ..\qt622).Path
+        mkdir ..\qt623-build
+        ${env:QT6_BUILD_PATH} = (Resolve-Path ..\qt623-build).Path
+        mkdir ..\Qt\6.2.3\msvc2019_64
+        ${env:QT6_PREFIX} = (Resolve-Path ..\Qt\6.2.3\msvc2019_64).Path
+        ${env:QT6_SRC} = (Resolve-Path ..\qt623).Path
         cmake -B "${env:QT6_BUILD_PATH}" -S "${env:QT6_SRC}" -DOPENSSL_ROOT_DIR="${env:OPENSSL_PREFIX}" -DCMAKE_INSTALL_PREFIX="${env:QT6_PREFIX}" -DQT_QMAKE_TARGET_MKSPEC="win32-msvc" -DCMAKE_CXX_COMPILER=cl -DCMAKE_BUILD_TYPE=Release -G Ninja
         cmake --build "${env:QT6_BUILD_PATH}" --parallel
         cmake --install "${env:QT6_BUILD_PATH}"
-    - name: Build eXMB (Qt 6.2.2 | OpenSSL-1.1.1m | MSVC2019-x64)
+    - name: Build eXMB (Qt 6.2.3 | OpenSSL-1.1.1m | MSVC2019-x64)
       env:
         REDDIT_CLIENT_ID: ${{ secrets.REDDIT_CLIENT_ID }}
       run: |
@@ -74,7 +74,7 @@ jobs:
         $MSVC2019_DEVSHELL_PATH = "$MSVC2019_INSTALL_PATH\Common7\Tools\Microsoft.VisualStudio.DevShell.dll"
         Import-Module $MSVC2019_DEVSHELL_PATH
         Enter-VsDevShell -VsInstallPath "$MSVC2019_INSTALL_PATH" -DevCmdArguments ($DEV_CMD_ARGS -join " ")
-        ${env:QT6_PREFIX} = (Resolve-Path ..\Qt\6.2.2\msvc2019_64).Path
+        ${env:QT6_PREFIX} = (Resolve-Path ..\Qt\6.2.3\msvc2019_64).Path
         ${env:CMAKE_PREFIX_PATH} = ${env:QT6_PREFIX}
         mkdir ..\eXMB-build
         ${env:EXMB_BUILD_PATH} = (Resolve-Path ..\eXMB-build).Path
@@ -88,7 +88,7 @@ jobs:
     - name: Deploy Qt6 shared libraries with eXMB
       run: |
         ${env:EXMB_RELEASE_PATH} = (Resolve-Path ..\eXMB-ReleaseOut).Path
-        ${env:QT6_PREFIX} = (Resolve-Path ..\Qt\6.2.2\msvc2019_64).Path
+        ${env:QT6_PREFIX} = (Resolve-Path ..\Qt\6.2.3\msvc2019_64).Path
         $VSWHERE_PATH = "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe"
         $DEV_CMD_ARGS = "-arch=amd64", "-host_arch=amd64", "-no_logo"
         $MSVC2019_VSWHERE_INSTALL_PATH_ARGS = "-products", "*", "-requires", "Microsoft.VisualStudio.Component.VC.Tools.x86.x64", "-version", "[16.0,17.0)", "-property", "installationPath"
@@ -106,39 +106,39 @@ jobs:
     - name: Upload build artifact
       uses: actions/upload-artifact@v2
       with:
-        name: win32-qt622-msvc2019_64
+        name: win32-qt623-msvc2019_64
         path: ${{ env.EXMB_RELEASE_PATH }}
-  ubuntu-qt622-gcc_64:
+  ubuntu-qt623-gcc_64:
     runs-on: ubuntu-latest
     steps:
     - name: Checkout project source code
       uses: actions/checkout@v2
     - name: Checkout project submodules
       run: git submodule update --init --recursive
-    - name: Install Qt 6.2.2 build requirements
+    - name: Install Qt 6.2.3 build requirements
       run: |
         sudo apt-get update && sudo apt-get install build-essential libclang-11-dev libgl1-mesa-dev libssl-dev libfontconfig1-dev libfreetype6-dev libx11-dev libx11-xcb-dev libxext-dev libxfixes-dev libxi-dev libxrender-dev libxcb1-dev libxcb-glx0-dev libxcb-keysyms1-dev libxcb-image0-dev libxcb-shm0-dev libxcb-icccm4-dev libxcb-sync-dev libxcb-xfixes0-dev libxcb-shape0-dev libxcb-randr0-dev libxcb-render-util0-dev libxcb-util-dev libxcb-xinerama0-dev libxcb-xkb-dev libxkbcommon-dev libxkbcommon-x11-dev ninja-build
-    - name: Get Qt 6.2.2 Source Code
+    - name: Get Qt 6.2.3 Source Code
       run: |
         cd ../
-        git clone git://code.qt.io/qt/qt5.git qt622 --branch=6.2.2
-        cd ./qt622
+        git clone git://code.qt.io/qt/qt5.git qt623 --branch=6.2.3
+        cd ./qt623
         perl init-repository --module-subset=qtbase,qtnetworkauth,qttools,qtwebsockets
-    - name: Build Qt 6.2.2
+    - name: Build Qt 6.2.3
       run: |
-        cmake -B ../qt622-build -S ../qt622 -DCMAKE_INSTALL_PREFIX="../Qt/6.2.2/gcc_64" -DQT_QMAKE_TARGET_MKSPEC="linux-g++" -DCMAKE_BUILD_TYPE=Release -G Ninja
-        cmake --build ../qt622-build
-        cmake --install ../qt622-build
+        cmake -B ../qt623-build -S ../qt623 -DCMAKE_INSTALL_PREFIX="../Qt/6.2.3/gcc_64" -DQT_QMAKE_TARGET_MKSPEC="linux-g++" -DCMAKE_BUILD_TYPE=Release -G Ninja
+        cmake --build ../qt623-build
+        cmake --install ../qt623-build
     - name: Build eXMB
       env:
         REDDIT_CLIENT_ID: ${{ secrets.REDDIT_CLIENT_ID }}
       run: |
-        CMAKE_PREFIX_PATH=../Qt/6.2.2/gcc_64 cmake -B ../eXMB-build -S . -DREDDIT_CLIENT_ID="$REDDIT_CLIENT_ID" -DCMAKE_INSTALL_PREFIX="../eXMB-ReleaseOut" -DCMAKE_SYSTEM_VERSION="10.0.22000.0"
+        CMAKE_PREFIX_PATH=../Qt/6.2.3/gcc_64 cmake -B ../eXMB-build -S . -DREDDIT_CLIENT_ID="$REDDIT_CLIENT_ID" -DCMAKE_INSTALL_PREFIX="../eXMB-ReleaseOut" -DCMAKE_SYSTEM_VERSION="10.0.22000.0"
         cmake --build ../eXMB-build --target eXMB --config Release
         cmake --install ../eXMB-build
         echo "EXMB_RELEASE_PATH=$(cd ../eXMB-ReleaseOut; pwd)" >> $GITHUB_ENV
     - name: Upload build artifact
       uses: actions/upload-artifact@v2
       with:
-        name: ubuntu-qt622-gcc_64
+        name: ubuntu-qt623-gcc_64
         path: ${{ env.EXMB_RELEASE_PATH }}
