@@ -1,0 +1,30 @@
+IDI_ICON1               ICON    "AppLogo.ico"
+#include <windows.h>
+#include "AppConfig.hxx"
+
+VS_VERSION_INFO VERSIONINFO
+FILEVERSION     APP_WIN32_VERSION
+PRODUCTVERSION  APP_WIN32_VERSION
+BEGIN
+    BLOCK "StringFileInfo"
+    BEGIN
+        BLOCK "040904E4"
+        BEGIN
+            VALUE "CompanyName",        APP_ORGANIZATION
+            VALUE "FileDescription",    APP_NAME
+            VALUE "FileVersion",        APP_WIN32_FILEVERSION_STR
+            VALUE "InternalName",       APP_NAME
+            VALUE "LegalCopyright",     APP_LEGALCOPYRIGHT
+            VALUE "LegalTrademarks1",   APP_LEGALTRADEMARKS1
+            VALUE "LegalTrademarks2",   APP_LEGALTRADEMARKS2
+            VALUE "OriginalFilename",   APP_ORIGINAL_NAME
+            VALUE "ProductName",        APP_NAME
+            VALUE "ProductVersion",     APP_WIN32_PRODUCTVERSION_STR
+        END
+    END
+
+    BLOCK "VarFileInfo"
+    BEGIN
+        VALUE "Translation", 0x409, 1252
+    END
+END

@@ -1,0 +1,64 @@
+QMainWindow, QMessageBox{
+  background-color: rgb(80, 80, 80);
+}
+QLabel{
+  background-color: rgba(0, 0, 0, 0);
+  border-radius: 5px;
+  color: rgb(155, 155, 155);
+  font-size: 16px;
+}
+QGroupBox{
+  border: 1px solid rgb(40, 40, 40);
+  border-radius: 5px;
+  padding-top: 20px;
+}
+QGroupBox::title{
+  background-color : rgba(0, 0, 0, 0.1);
+  border: 1px solid rgb(40, 40, 40);
+  border-radius: 5px;
+  padding-top: -10px;
+  color: rgb(155, 155, 155);
+  padding: 2px;
+}
+QLineEdit{
+  background-color: rgba(0, 0, 0, 0.1);
+  border: 1px solid rgb(40, 40, 40);
+  border-radius: 5px;
+  color: rgb(155, 155, 155);
+  font-size: 12px;
+}
+QCheckBox, QPushButton{
+  background-color: rgba(0, 0, 0, 0.1);
+  border: 1px solid rgb(40, 40, 40);
+  color: rgb(155, 155, 155);
+  border-radius: 5px;
+  font-size: 12px;
+  padding: 2px 5px 2px 5px;
+}
+QPushButton:hover:!pressed{
+  background-color : rgba(0, 0, 0, 0.3);
+}
+QPushButton:pressed{
+  background-color: rgba(0, 0, 0, 0.5);
+}
+QRadioButton{
+  color: rgb(155, 155, 155);
+}
+QProgressBar{
+  border-radius: 5px;
+  background-color : rgba(0, 0, 0, 0.2);
+}
+QProgressBar::chunk{
+  background-color: rgb(59, 122, 87);
+  border-radius: 5px;
+}
+QMenu, QMenuBar{
+  background-color: rgb(80, 80, 80);
+  color: rgb(155, 155, 155);
+}
+QMenu::item{
+  background-color: transparent;
+}
+QMenuBar::item:selected, QMenu::item:selected{
+  background-color: rgb(60, 60, 60);
+}
