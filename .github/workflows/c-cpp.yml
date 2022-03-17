@@ -6,7 +6,7 @@ on:
     branches: [ qt6-cmake ]
 jobs:
   win32-qt623-msvc2019_64:
-    runs-on: windows-latest
+    runs-on: windows-2019
     steps:
     - name: Checkout project source code
       uses: actions/checkout@v2
@@ -82,7 +82,7 @@ jobs:
         ${env:EXMB_RELEASE_PATH} = (Resolve-Path ..\eXMB-ReleaseOut).Path
         ${env:OPENSSL_PREFIX} = (Resolve-Path ..\OpenSSL-1.1.1m).Path
         cmake -B "${env:EXMB_BUILD_PATH}" -S . -DREDDIT_CLIENT_ID="${env:REDDIT_CLIENT_ID}" -DCMAKE_INSTALL_PREFIX="${env:EXMB_RELEASE_PATH}" -DCMAKE_SYSTEM_VERSION="10.0.22000.0" -DOPENSSL_ROOT_DIR="${env:OPENSSL_PREFIX}"
-        cmake --build "${env:EXMB_BUILD_PATH}" --target eXMB --config Release --parallel
+        cmake --build "${env:EXMB_BUILD_PATH}" --target ALL_BUILD --config Release --parallel
         cmake --install "${env:EXMB_BUILD_PATH}"
         echo "EXMB_RELEASE_PATH=${env:EXMB_RELEASE_PATH}" >> ${env:GITHUB_ENV}
     - name: Deploy Qt6 shared libraries with eXMB
