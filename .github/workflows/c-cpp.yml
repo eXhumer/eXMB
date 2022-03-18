@@ -134,7 +134,7 @@ jobs:
         REDDIT_CLIENT_ID: ${{ secrets.REDDIT_CLIENT_ID }}
       run: |
         CMAKE_PREFIX_PATH=../Qt/6.2.3/gcc_64 cmake -B ../eXMB-build -S . -DREDDIT_CLIENT_ID="$REDDIT_CLIENT_ID" -DCMAKE_INSTALL_PREFIX="../eXMB-ReleaseOut" -DCMAKE_SYSTEM_VERSION="10.0.22000.0"
-        cmake --build ../eXMB-build --target ALL_BUILD --config Release
+        cmake --build ../eXMB-build --target eXMB StreamableUploader --config Release
         cmake --install ../eXMB-build
         echo "EXMB_RELEASE_PATH=$(cd ../eXMB-ReleaseOut; pwd)" >> $GITHUB_ENV
     - name: Upload build artifact
