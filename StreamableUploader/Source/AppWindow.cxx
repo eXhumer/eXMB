@@ -190,7 +190,8 @@ void AppWindow::onVideoFileSelectAndUpload() {
                                   const QString &videoLink) {
         if (videoFile == vidFile) {
           QMessageBox::information(this, "Video Posted Successfully!",
-                                   videoLink);
+                                   "<a href=\"" + videoLink +
+                                       "\">Video Link</a>");
           videoCtx->deleteLater();
         }
       },
