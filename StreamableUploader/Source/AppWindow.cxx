@@ -61,6 +61,33 @@ void SetDarkModeStatus(bool useDarkMode, HWND winId) {
 }
 #endif // WIN32
 
+QMessageBox *CreateMessageBox(QMessageBox::Icon icon, const QString &title,
+                              const QString &text,
+                              QMessageBox::StandardButtons buttons =
+                                  QMessageBox::StandardButton::NoButton,
+                              QWidget *parent = nullptr) {
+  QMessageBox *msgBox = new QMessageBox(icon, title, text, buttons, parent);
+#ifdef WIN32
+  BOOL IsDarkTheme = IsWindowsDarkMode();
+  SetDarkModeStatus(IsDarkTheme, HWND(msgBox->winId()));
+
+  QTimer *themeChangeTimer = new QTimer(msgBox);
+  bool darkMode = IsDarkTheme;
+  themeChangeTimer->connect(
+      themeChangeTimer, &QTimer::timeout, msgBox, [msgBox, &darkMode]() {
+        bool newDarkMode = darkMode;
+
+        if (darkMode != newDarkMode) {
+          darkMode = newDarkMode;
+          SetDarkModeStatus(darkMode, HWND(msgBox->winId()));
+        }
+      });
+  themeChangeTimer->start(1000);
+#endif // WIN32
+
+  return msgBox;
+}
+
 AppWindow::AppWindow(QWidget *parent) : QMainWindow(parent) {
 #ifdef WIN32
   m_darkMode = IsWindowsDarkMode();
@@ -117,30 +144,15 @@ void AppWindow::setupMenuBar() {
   QAction *aboutAct = helpMenu->addAction("About");
   QAction *aboutQtAct = helpMenu->addAction("About Qt");
   connect(aboutAct, &QAction::triggered, this, [this](bool checked) {
-    QMessageBox *aboutMsgBox = new QMessageBox(
+    QMessageBox *aboutMsgBox = CreateMessageBox(
         QMessageBox::NoIcon, "About",
         QString(APP_NAME) + " v" + QString(APP_VERSION) +
             "\n\nStreamable Video Uploader.\n\nCopyright (C) 2022 - eXhumer",
         QMessageBox::Ok, this);
+
     QIcon icon = aboutMsgBox->windowIcon();
     QSize size = icon.actualSize(QSize(64, 64));
     aboutMsgBox->setIconPixmap(icon.pixmap(size));
-#ifdef WIN32
-    SetDarkModeStatus(m_darkMode, HWND(aboutMsgBox->winId()));
-
-    QTimer *themeChangeTimer = new QTimer(aboutMsgBox);
-    bool darkMode = m_darkMode;
-    connect(themeChangeTimer, &QTimer::timeout, aboutMsgBox,
-            [this, aboutMsgBox, &darkMode]() {
-              bool newDarkMode = m_darkMode;
-
-              if (darkMode != newDarkMode) {
-                darkMode = newDarkMode;
-                SetDarkModeStatus(darkMode, HWND(aboutMsgBox->winId()));
-              }
-            });
-    themeChangeTimer->start(1000);
-#endif // WIN32
     aboutMsgBox->exec();
     aboutMsgBox->deleteLater();
   });
@@ -189,9 +201,16 @@ void AppWindow::onVideoFileSelectAndUpload() {
       [this, videoCtx, videoFile](QFile *vidFile, const QString &videoId,
                                   const QString &videoLink) {
         if (videoFile == vidFile) {
-          QMessageBox::information(this, "Video Posted Successfully!",
-                                   "<a href=\"" + videoLink +
-                                       "\">Video Link</a>");
+          QMessageBox *videoLinkMsgBox = CreateMessageBox(
+              QMessageBox::NoIcon, "Video Posted Successfully!",
+              "<a href=\"" + videoLink + "\">Video Link</a>", QMessageBox::Ok,
+              this);
+
+          QIcon icon = videoLinkMsgBox->windowIcon();
+          QSize size = icon.actualSize(QSize(64, 64));
+          videoLinkMsgBox->setIconPixmap(icon.pixmap(size));
+          videoLinkMsgBox->exec();
+          videoLinkMsgBox->deleteLater();
           videoCtx->deleteLater();
         }
       },
@@ -201,7 +220,11 @@ void AppWindow::onVideoFileSelectAndUpload() {
       m_media, &eXVHP::Service::MediaService::mediaUploadError, videoCtx,
       [this, videoCtx, videoFile](QFile *vidFile, const QString &error) {
         if (videoFile == vidFile) {
-          QMessageBox::warning(this, "Media Upload Error", error);
+          QMessageBox *videoLinkMsgBox =
+              CreateMessageBox(QMessageBox::Warning, "Media Upload Error",
+                               error, QMessageBox::Ok, this);
+          videoLinkMsgBox->exec();
+          videoLinkMsgBox->deleteLater();
           videoCtx->deleteLater();
         }
       },

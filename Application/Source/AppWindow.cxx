@@ -62,6 +62,33 @@ void SetDarkModeStatus(bool useDarkMode, HWND winId) {
 }
 #endif // WIN32
 
+QMessageBox *CreateMessageBox(QMessageBox::Icon icon, const QString &title,
+                              const QString &text,
+                              QMessageBox::StandardButtons buttons =
+                                  QMessageBox::StandardButton::NoButton,
+                              QWidget *parent = nullptr) {
+  QMessageBox *msgBox = new QMessageBox(icon, title, text, buttons, parent);
+#ifdef WIN32
+  BOOL IsDarkTheme = IsWindowsDarkMode();
+  SetDarkModeStatus(IsDarkTheme, HWND(msgBox->winId()));
+
+  QTimer *themeChangeTimer = new QTimer(msgBox);
+  bool darkMode = IsDarkTheme;
+  themeChangeTimer->connect(
+      themeChangeTimer, &QTimer::timeout, msgBox, [msgBox, &darkMode]() {
+        bool newDarkMode = darkMode;
+
+        if (darkMode != newDarkMode) {
+          darkMode = newDarkMode;
+          SetDarkModeStatus(darkMode, HWND(msgBox->winId()));
+        }
+      });
+  themeChangeTimer->start(1000);
+#endif // WIN32
+
+  return msgBox;
+}
+
 AppWindow::AppWindow(const QString &redditClientId, QWidget *parent)
     : QMainWindow(parent), m_appDataDir(QStandardPaths::writableLocation(
                                QStandardPaths::AppDataLocation)) {
@@ -166,31 +193,16 @@ void AppWindow::setupMenuBar() {
   QAction *aboutAct = helpMenu->addAction("About");
   QAction *aboutQtAct = helpMenu->addAction("About Qt");
   connect(aboutAct, &QAction::triggered, this, [this](bool checked) {
-    QMessageBox *aboutMsgBox = new QMessageBox(
+    QMessageBox *aboutMsgBox = CreateMessageBox(
         QMessageBox::NoIcon, "About",
         QString(APP_NAME) + " v" + QString(APP_VERSION) +
             "\n\nReddit media poster via external media hosting "
             "platforms.\n\nCopyright (C) 2022 - eXhumer",
         QMessageBox::Ok, this);
+
     QIcon icon = aboutMsgBox->windowIcon();
     QSize size = icon.actualSize(QSize(64, 64));
     aboutMsgBox->setIconPixmap(icon.pixmap(size));
-#ifdef WIN32
-    SetDarkModeStatus(m_darkMode, HWND(aboutMsgBox->winId()));
-
-    QTimer *themeChangeTimer = new QTimer(aboutMsgBox);
-    bool darkMode = m_darkMode;
-    connect(themeChangeTimer, &QTimer::timeout, aboutMsgBox,
-            [this, aboutMsgBox, &darkMode]() {
-              bool newDarkMode = m_darkMode;
-
-              if (darkMode != newDarkMode) {
-                darkMode = newDarkMode;
-                SetDarkModeStatus(darkMode, HWND(aboutMsgBox->winId()));
-              }
-            });
-    themeChangeTimer->start(1000);
-#endif // WIN32
     aboutMsgBox->exec();
     aboutMsgBox->deleteLater();
   });
@@ -324,14 +336,22 @@ void AppWindow::onReady(const QJsonObject &identity) {
 void AppWindow::onGrantError(const QString &error) {
   m_authBtn->setEnabled(true);
 
-  if (error == "access_denied")
-    QMessageBox::warning(
-        this, "User Denied Access",
-        "Unable to continue unless user authorizes application!");
+  if (error == "access_denied") {
+    QMessageBox *msgBox = CreateMessageBox(
+        QMessageBox::Warning, "User Denied Access",
+        "Unable to continue unless user authorizes application!",
+        QMessageBox::Ok, this);
+    msgBox->exec();
+    msgBox->deleteLater();
+  }
 
-  else
-    QMessageBox::warning(this, "Error occurred during authorization",
-                         "Error: " + error);
+  else {
+    QMessageBox *msgBox = CreateMessageBox(
+        QMessageBox::Warning, "Error occurred during authorization",
+        "Error: " + error, QMessageBox::Ok, this);
+    msgBox->exec();
+    msgBox->deleteLater();
+  }
 }
 
 void AppWindow::onRevoke() {
@@ -349,14 +369,21 @@ void AppWindow::onRevoked() {
 
 void AppWindow::onRevokeError(const QString &errorString) {
   m_revokeBtn->setEnabled(true);
-  QMessageBox::warning(this, "Error occurred while revoking token",
-                       errorString);
+  QMessageBox *msgBox = CreateMessageBox(QMessageBox::Warning,
+                                         "Error occurred while revoking token",
+                                         errorString, QMessageBox::Ok, this);
+  msgBox->exec();
+  msgBox->deleteLater();
 }
 
 void AppWindow::onVideoFileSelectAndUpload() {
   if (m_titleLE->text().isEmpty()) {
-    QMessageBox::warning(this, "No post title specified",
-                         "A post title must be specified for a Reddit post!");
+    QMessageBox *msgBox =
+        CreateMessageBox(QMessageBox::Warning, "No post title specified",
+                         "A post title must be specified for a Reddit post!",
+                         QMessageBox::Ok, this);
+    msgBox->exec();
+    msgBox->deleteLater();
     return;
   }
 
@@ -365,9 +392,12 @@ void AppWindow::onVideoFileSelectAndUpload() {
                       m_sggRB->isChecked() || m_sjaRB->isChecked();
 
   if (!hostSelected) {
-    QMessageBox::warning(
-        this, "No video host selected",
-        "You need to select a video host before selecting the video file!");
+    QMessageBox *msgBox = CreateMessageBox(
+        QMessageBox::Warning, "No video host selected",
+        "You need to select a video host before selecting the video file!",
+        QMessageBox::Ok, this);
+    msgBox->exec();
+    msgBox->deleteLater();
     return;
   }
 
@@ -413,10 +443,17 @@ void AppWindow::onVideoFileSelectAndUpload() {
                 [this, videoCtx, videoLink](const QString &postUrl,
                                             const QString &redditUrl) {
                   if (postUrl == videoLink) {
-                    QMessageBox::information(this, "Video Posted Successfully!",
-                                             "Posted <a href=\"" + postUrl +
-                                                 "\">Video</a> to <a href=\"" +
-                                                 redditUrl + "\">Reddit</a>!");
+                    QMessageBox *videoLinkMsgBox = new QMessageBox(
+                        QMessageBox::NoIcon, "Video Posted Successfully!",
+                        "Posted <a href=\"" + postUrl +
+                            "\">Video</a> to <a href=\"" + redditUrl +
+                            "\">Reddit</a>!",
+                        QMessageBox::Ok, this);
+                    QIcon icon = videoLinkMsgBox->windowIcon();
+                    QSize size = icon.actualSize(QSize(64, 64));
+                    videoLinkMsgBox->setIconPixmap(icon.pixmap(size));
+                    videoLinkMsgBox->exec();
+                    videoLinkMsgBox->deleteLater();
                     videoCtx->deleteLater();
                   }
                 },
@@ -426,9 +463,12 @@ void AppWindow::onVideoFileSelectAndUpload() {
                 [this, videoCtx, videoLink](const QString &postUrl,
                                             const QString &error) {
                   if (postUrl == videoLink) {
-                    QMessageBox::warning(
-                        this, "Reddit Media Post Error!",
-                        "Error while posting media link to Reddit!\n" + error);
+                    QMessageBox *msgBox = CreateMessageBox(
+                        QMessageBox::Warning, "Reddit Media Post Error!",
+                        "Error while posting media link to Reddit!\n" + error,
+                        QMessageBox::Ok, this);
+                    msgBox->exec();
+                    msgBox->deleteLater();
                     videoCtx->deleteLater();
                   }
                 },
@@ -446,7 +486,11 @@ void AppWindow::onVideoFileSelectAndUpload() {
         m_media, &eXVHP::Service::MediaService::mediaUploadError, videoCtx,
         [this, videoCtx, videoFile](QFile *vidFile, const QString &error) {
           if (videoFile == vidFile) {
-            QMessageBox::warning(this, "Media Upload Error", error);
+            QMessageBox *msgBox =
+                CreateMessageBox(QMessageBox::Warning, "Media Upload Error",
+                                 error, QMessageBox::Ok, this);
+            msgBox->exec();
+            msgBox->deleteLater();
             videoCtx->deleteLater();
           }
         },
@@ -480,32 +524,46 @@ void AppWindow::onVideoFileSelectAndUpload() {
         m_red, &eXRC::Service::Reddit::mediaUploadError, videoCtx,
         [this, videoCtx, videoFile](QFile *errorFile, const QString &error) {
           if (errorFile == videoFile) {
-            QMessageBox::warning(
-                this, "Error occurred while uploading media file", error);
+            QMessageBox *msgBox =
+                CreateMessageBox(QMessageBox::Warning,
+                                 "Error occurred while uploading media file",
+                                 error, QMessageBox::Ok, this);
+            msgBox->exec();
+            msgBox->deleteLater();
             videoCtx->deleteLater();
           }
         });
 
-    connect(
-        m_red, &eXRC::Service::Reddit::postMediaError, videoCtx,
-        [this, videoCtx, videoFile](QFile *errorFile, QFile *videoThumbnailFile,
-                                    const QString &error) {
-          if (errorFile == videoFile) {
-            QMessageBox::warning(
-                this, "Error occurred while post uploaded media file to Reddit",
-                error);
-            videoCtx->deleteLater();
-          }
-        });
+    connect(m_red, &eXRC::Service::Reddit::postMediaError, videoCtx,
+            [this, videoCtx, videoFile](QFile *errorFile,
+                                        QFile *videoThumbnailFile,
+                                        const QString &error) {
+              if (errorFile == videoFile) {
+                QMessageBox *msgBox = CreateMessageBox(
+                    QMessageBox::Warning,
+                    "Error occurred while post uploaded media file to Reddit",
+                    error, QMessageBox::Ok, this);
+                msgBox->exec();
+                msgBox->deleteLater();
+                videoCtx->deleteLater();
+              }
+            });
 
     connect(m_red, &eXRC::Service::Reddit::postedMedia, videoCtx,
             [this, videoCtx, videoFile](QFile *mediaFile,
                                         QFile *videoThumbnailFile,
                                         const QString &postUrl) {
               if (mediaFile == videoFile) {
-                QMessageBox::information(this, "Video Posted Successfully!",
-                                         "Posted to <a href=\"" + postUrl +
-                                             "\">Reddit</a>!");
+                QMessageBox *msgBox = CreateMessageBox(
+                    QMessageBox::NoIcon, "Video Posted Successfully!",
+                    "Posted to <a href=\"" + postUrl + "\">Reddit</a>!",
+                    QMessageBox::Ok, this);
+
+                QIcon icon = msgBox->windowIcon();
+                QSize size = icon.actualSize(QSize(64, 64));
+                msgBox->setIconPixmap(icon.pixmap(size));
+                msgBox->exec();
+                msgBox->deleteLater();
                 videoCtx->deleteLater();
               }
             });
