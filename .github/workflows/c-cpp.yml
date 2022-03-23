@@ -49,7 +49,7 @@ jobs:
         perl Configure --openssldir=${env:OPENSSL_DIR} --prefix=${env:OPENSSL_PREFIX} VC-WIN64A
         nmake
         nmake install
-    - name: Build Qt 6.2.4 (OpenSSL 1.1.1n | MSVC2019-x64)
+    - name: Build Qt 6.2.4 (MSVC2019-x64)
       run: |
         $VSWHERE_PATH = "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe"
         $DEV_CMD_ARGS = "-arch=amd64", "-host_arch=amd64", "-no_logo"
@@ -58,16 +58,12 @@ jobs:
         $MSVC2019_DEVSHELL_PATH = "$MSVC2019_INSTALL_PATH\Common7\Tools\Microsoft.VisualStudio.DevShell.dll"
         Import-Module $MSVC2019_DEVSHELL_PATH
         Enter-VsDevShell -VsInstallPath "$MSVC2019_INSTALL_PATH" -DevCmdArguments ($DEV_CMD_ARGS -join " ")
-        ${env:OPENSSL_PREFIX} = (Resolve-Path ..\OpenSSL-1.1.1n).Path
-        mkdir ..\qt624-build
-        ${env:QT6_BUILD_PATH} = (Resolve-Path ..\qt624-build).Path
-        mkdir ..\Qt\6.2.4\msvc2019_64
-        ${env:QT6_PREFIX} = (Resolve-Path ..\Qt\6.2.4\msvc2019_64).Path
-        ${env:QT6_SRC} = (Resolve-Path ..\qt624).Path
-        cmake -B "${env:QT6_BUILD_PATH}" -S "${env:QT6_SRC}" -DOPENSSL_ROOT_DIR="${env:OPENSSL_PREFIX}" -DCMAKE_INSTALL_PREFIX="${env:QT6_PREFIX}" -DQT_QMAKE_TARGET_MKSPEC="win32-msvc" -DCMAKE_CXX_COMPILER=cl -DCMAKE_BUILD_TYPE=Release -G Ninja
-        cmake --build "${env:QT6_BUILD_PATH}" --parallel
-        cmake --install "${env:QT6_BUILD_PATH}"
-    - name: Build eXMB (Qt 6.2.4 | OpenSSL-1.1.1n | MSVC2019-x64)
+        mkdir ..\qt624-shared
+        cd ..\qt624-shared
+        ..\qt624\configure.bat -prefix ..\Qt\6.2.4\msvc2019_64 -platform win32-msvc -release -shared
+        cmake --build . --parallel
+        cmake --install .
+    - name: Build eXMB (Qt 6.2.4 | OpenSSL 1.1.1n | MSVC2019-x64)
       env:
         REDDIT_CLIENT_ID: ${{ secrets.REDDIT_CLIENT_ID }}
       run: |
@@ -110,9 +106,9 @@ jobs:
     - name: Upload build artifact
       uses: actions/upload-artifact@v2
       with:
-        name: win32-qt624-msvc2019_64
+        name: win32-qt624-msvc2019_64-shared
         path: ${{ env.EXMB_RELEASE_PATH }}
-  ubuntu-qt624-gcc_64:
+  ubuntu-qt624-gcc_64-shared:
     runs-on: ubuntu-latest
     steps:
     - name: Checkout project source code
@@ -134,9 +130,11 @@ jobs:
         rm c636844e2f6cd55890234989136cddbdf0b435f3.patch
     - name: Build Qt 6.2.4
       run: |
-        cmake -B ../qt624-build -S ../qt624 -DCMAKE_INSTALL_PREFIX="../Qt/6.2.4/gcc_64" -DQT_QMAKE_TARGET_MKSPEC="linux-g++" -DCMAKE_BUILD_TYPE=Release -G Ninja
-        cmake --build ../qt624-build
-        cmake --install ../qt624-build
+        mkdir ../qt624-shared
+        cd ../qt624-shared
+        ../qt624/configure -prefix ../Qt/6.2.4/gcc_64 -platform linux-g++ -release -shared
+        cmake --build . --parallel
+        cmake --install .
     - name: Build eXMB
       env:
         REDDIT_CLIENT_ID: ${{ secrets.REDDIT_CLIENT_ID }}
@@ -148,5 +146,5 @@ jobs:
     - name: Upload build artifact
       uses: actions/upload-artifact@v2
       with:
-        name: ubuntu-qt624-gcc_64
+        name: ubuntu-qt624-gcc_64-shared
         path: ${{ env.EXMB_RELEASE_PATH }}
