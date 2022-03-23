@@ -82,7 +82,7 @@ jobs:
         cmake -B ..\eXMB-build -S . -DREDDIT_CLIENT_ID="${env:REDDIT_CLIENT_ID}" -DCMAKE_INSTALL_PREFIX="..\eXMB-ReleaseOut" -DCMAKE_SYSTEM_VERSION="10.0.22000.0" -DOPENSSL_ROOT_DIR="..\OpenSSL-1.1.1n"
         cmake --build ..\eXMB-build --target ALL_BUILD --config Release --parallel
         cmake --install ..\eXMB-build
-        ${env:EXMB_RELEASE_PATH} = Resolve-Path ..\eXMB-ReleaseOut).Path
+        ${env:EXMB_RELEASE_PATH} = (Resolve-Path ..\eXMB-ReleaseOut).Path
         echo "EXMB_RELEASE_PATH=${env:EXMB_RELEASE_PATH}" >> ${env:GITHUB_ENV}
     - name: Deploy Qt6 shared libraries with eXMB
       run: |
@@ -180,7 +180,7 @@ jobs:
         cmake -B ..\eXMB-build -S . -DREDDIT_CLIENT_ID="${env:REDDIT_CLIENT_ID}" -DCMAKE_INSTALL_PREFIX="..\eXMB-ReleaseOut" -DCMAKE_SYSTEM_VERSION="10.0.22000.0" -DOPENSSL_ROOT_DIR="..\OpenSSL-1.1.1n"
         cmake --build ..\eXMB-build --target ALL_BUILD --config Release --parallel
         cmake --install ..\eXMB-build
-        ${env:EXMB_RELEASE_PATH} = Resolve-Path ..\eXMB-ReleaseOut).Path
+        ${env:EXMB_RELEASE_PATH} = (Resolve-Path ..\eXMB-ReleaseOut).Path
         echo "EXMB_RELEASE_PATH=${env:EXMB_RELEASE_PATH}" >> ${env:GITHUB_ENV}
     - name: Upload build artifact
       uses: actions/upload-artifact@v2
