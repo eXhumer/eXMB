@@ -128,6 +128,7 @@ jobs:
         git clone git://code.qt.io/qt/qt5.git qt624 --branch=6.2.4
         cd ./qt624
         perl init-repository --module-subset=qtbase,qtnetworkauth,qttools,qtwebsockets
+        cd ./qtbase
         wget "https://github.com/eXhumer/qtbase-exmb/commit/c636844e2f6cd55890234989136cddbdf0b435f3.patch"
         git apply c636844e2f6cd55890234989136cddbdf0b435f3.patch
         rm c636844e2f6cd55890234989136cddbdf0b435f3.patch
