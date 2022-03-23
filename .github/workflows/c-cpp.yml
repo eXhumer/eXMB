@@ -38,7 +38,8 @@ jobs:
         Expand-Archive NASM.zip
     - name: Configure, Build & Install OpenSSL (NASM 2.15.05 | MSVC2019-x64)
       run: |
-        ${env:PATH} += ";${(Resolve-Path ../NASM/nasm-2.15.05/).Path}"
+        ${env:NASM_PATH} = (Resolve-Path ../NASM/nasm-2.15.05/).Path
+        ${env:PATH} += ";${env:NASM_PATH}"
         $VSWHERE_PATH = "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe"
         $DEV_CMD_ARGS = "-arch=amd64", "-host_arch=amd64", "-no_logo"
         $MSVC2019_VSWHERE_INSTALL_PATH_ARGS = "-products", "*", "-requires", "Microsoft.VisualStudio.Component.VC.Tools.x86.x64", "-version", "[16.0,17.0)", "-property", "installationPath"
@@ -134,7 +135,8 @@ jobs:
         Expand-Archive NASM.zip
     - name: Configure, Build & Install OpenSSL (NASM 2.15.05 | MSVC2019-x64)
       run: |
-        ${env:PATH} += ";${(Resolve-Path ../NASM/nasm-2.15.05/).Path}"
+        ${env:NASM_PATH} = (Resolve-Path ../NASM/nasm-2.15.05/).Path
+        ${env:PATH} += ";${env:NASM_PATH}"
         $VSWHERE_PATH = "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe"
         $DEV_CMD_ARGS = "-arch=amd64", "-host_arch=amd64", "-no_logo"
         $MSVC2019_VSWHERE_INSTALL_PATH_ARGS = "-products", "*", "-requires", "Microsoft.VisualStudio.Component.VC.Tools.x86.x64", "-version", "[16.0,17.0)", "-property", "installationPath"
