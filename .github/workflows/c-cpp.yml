@@ -47,7 +47,8 @@ jobs:
         Import-Module $MSVC2019_DEVSHELL_PATH
         Enter-VsDevShell -VsInstallPath "$MSVC2019_INSTALL_PATH" -DevCmdArguments ($DEV_CMD_ARGS -join " ")
         cd ..\openssl\
-        perl Configure --openssldir=..\OpenSSL-Dir --prefix="${Resolve-Path ..\eXMB-ReleaseOut).Path}" VC-WIN64A
+        mkdir ..\OpenSSL-1.1.1n\ && mkdir ..\OpenSSL-Dir\
+        perl Configure --openssldir="${(Resolve-Path ..\OpenSSL-Dir).Path}" --prefix="${(Resolve-Path ..\OpenSSL-1.1.1n).Path}" VC-WIN64A
         nmake
         nmake install
     - name: Configure, Build & Install Qt 6.2.4 (MSVC2019-x64)
@@ -140,7 +141,8 @@ jobs:
         Import-Module $MSVC2019_DEVSHELL_PATH
         Enter-VsDevShell -VsInstallPath "$MSVC2019_INSTALL_PATH" -DevCmdArguments ($DEV_CMD_ARGS -join " ")
         cd ..\openssl\
-        perl Configure --openssldir=..\OpenSSL-Dir --prefix="${Resolve-Path ..\eXMB-ReleaseOut).Path}" VC-WIN64A
+        mkdir ..\OpenSSL-1.1.1n\ && mkdir ..\OpenSSL-Dir\
+        perl Configure --openssldir="${(Resolve-Path ..\OpenSSL-Dir).Path}" --prefix="${(Resolve-Path ..\OpenSSL-1.1.1n).Path}" VC-WIN64A
         nmake
         nmake install
     - name: Configure, Build & Install Qt 6.2.4 (MSVC2019-x64)
