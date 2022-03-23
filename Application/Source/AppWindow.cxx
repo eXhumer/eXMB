@@ -17,6 +17,7 @@
 
 #include "AppWindow.hxx"
 #include "AppConfig.hxx"
+#include "FlairListModel.hxx"
 #include "eXRC/Reddit.hxx"
 #include "eXVHP/Service.hxx"
 #include <QApplication>
@@ -150,6 +151,12 @@ void AppWindow::setupCentralWidget() {
   m_authGB->setLayout(authLayout);
   m_postGB->setLayout(postLayout);
 
+  QObject::disconnect(m_flairCompleter, nullptr, nullptr, nullptr);
+  connect(m_flairCompleter,
+          QOverload<const QModelIndex &>::of(&QCompleter::activated),
+          [this](const QModelIndex &index) {
+            m_flairLE->setText(index.data(Qt::UserRole + 1).toString());
+          });
   connect(m_red, &eXRC::Service::Reddit::ready, this, &AppWindow::onReady);
   connect(m_red, &eXRC::Service::Reddit::grantError, this,
           &AppWindow::onGrantError);
@@ -162,6 +169,36 @@ void AppWindow::setupCentralWidget() {
   connect(m_revokeBtn, &QPushButton::clicked, this, &AppWindow::onRevoke);
   connect(m_videoSelectBtn, &QPushButton::clicked, this,
           &AppWindow::onVideoFileSelectAndUpload);
+  connect(m_red, &eXRC::Service::Reddit::subredditLinkFlairs, this,
+          [this](const QString &subreddit, const QJsonArray &flairs) {
+            if (subreddit == m_subredditLE->text()) {
+              this->m_flairCompleter->setModel(new FlairListModel(flairs));
+            }
+          });
+  connect(m_red, &eXRC::Service::Reddit::postRequirements, this,
+          [this](const QString &subreddit, bool flairRequired) {
+            if (subreddit == m_subredditLE->text() && flairRequired) {
+              this->m_red->subredditLinkFlair(subreddit);
+            }
+          });
+  connect(m_red, &eXRC::Service::Reddit::invalidSubreddit, this,
+          [this](const QString &subreddit) {
+            QMessageBox *msgBox = CreateMessageBox(
+                QMessageBox::Warning, "Invalid Subreddit",
+                "Subreddit " + m_subredditLE->text() + " doesn't exist!",
+                QMessageBox::Ok, this);
+            m_subredditLE->setText(QString());
+            msgBox->exec();
+            msgBox->deleteLater();
+          });
+  connect(m_subredditLE, &QLineEdit::editingFinished, this, [this]() {
+    m_flairCompleter->setModel(new FlairListModel(QJsonArray()));
+
+    if (m_subredditLE->text().isEmpty())
+      return;
+
+    this->m_red->postRequirement(m_subredditLE->text());
+  });
 
   centralLayout->addWidget(m_authGB);
   centralLayout->addWidget(m_postGB);
@@ -252,6 +289,11 @@ void AppWindow::setupWidgets() {
   m_titleLE->setAlignment(Qt::AlignHCenter);
   m_flairLE = new QLineEdit;
   m_flairLE->setAlignment(Qt::AlignHCenter);
+  m_flairCompleter = new QCompleter(m_flairLE);
+  m_flairCompleter->setFilterMode(Qt::MatchFlag::MatchContains);
+  m_flairCompleter->setCompletionRole(Qt::UserRole);
+  m_flairCompleter->setCaseSensitivity(Qt::CaseSensitivity::CaseInsensitive);
+  m_flairLE->setCompleter(m_flairCompleter);
   m_uploadProgress = new QProgressBar;
   m_uploadProgress->setTextVisible(false);
   m_authBtn = new QPushButton("Authorize");

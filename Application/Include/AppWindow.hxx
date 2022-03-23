@@ -27,6 +27,7 @@ class MediaService;
 } // namespace eXVHP::Service
 
 #include <QCheckBox>
+#include <QCompleter>
 #include <QDir>
 #include <QGroupBox>
 #include <QLineEdit>
@@ -47,6 +48,7 @@ private:
   eXRC::Service::Reddit *m_red;
   eXVHP::Service::MediaService *m_media;
   QCheckBox *m_permanentCB, *m_postNSFWCB, *m_postSRCB, *m_postSpoilerCB;
+  QCompleter *m_flairCompleter;
   QGroupBox *m_authGB, *m_postGB;
   QLineEdit *m_subredditLE, *m_titleLE, *m_flairLE, *m_authStateLE;
   QProgressBar *m_uploadProgress;
