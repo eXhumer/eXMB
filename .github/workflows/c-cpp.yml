@@ -5,7 +5,7 @@ on:
   pull_request:
     branches: [ qt6-cmake ]
 jobs:
-  win32-qt624-msvc2019_64:
+  win32-qt624-msvc2019_64-shared:
     runs-on: windows-2019
     steps:
     - name: Checkout project source code
@@ -18,7 +18,11 @@ jobs:
         git clone git://code.qt.io/qt/qt5.git qt624 --branch=6.2.4
         cd .\qt624
         perl init-repository --module-subset=qtbase,qtnetworkauth,qttools,qtwebsockets
-    - name: Build OpenSSL 1.1.1m (NASM 2.15.05 | MSVC2019-x64)
+        cd .\qtbase\
+        Invoke-WebRequest -Uri "https://github.com/eXhumer/qtbase-exmb/commit/c636844e2f6cd55890234989136cddbdf0b435f3.patch" -OutFile .\qtbase.patch
+        git apply .\qtbase.patch
+        rm .\qtbase.patch
+    - name: Build OpenSSL 1.1.1n (NASM 2.15.05 | MSVC2019-x64)
       run: |
         $VSWHERE_PATH = "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe"
         $DEV_CMD_ARGS = "-arch=amd64", "-host_arch=amd64", "-no_logo"
@@ -45,7 +49,7 @@ jobs:
         perl Configure --openssldir=${env:OPENSSL_DIR} --prefix=${env:OPENSSL_PREFIX} VC-WIN64A
         nmake
         nmake install
-    - name: Build Qt 6.2.4 (OpenSSL 1.1.1m | MSVC2019-x64)
+    - name: Build Qt 6.2.4 (OpenSSL 1.1.1n | MSVC2019-x64)
       run: |
         $VSWHERE_PATH = "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe"
         $DEV_CMD_ARGS = "-arch=amd64", "-host_arch=amd64", "-no_logo"
@@ -124,6 +128,9 @@ jobs:
         git clone git://code.qt.io/qt/qt5.git qt624 --branch=6.2.4
         cd ./qt624
         perl init-repository --module-subset=qtbase,qtnetworkauth,qttools,qtwebsockets
+        wget "https://github.com/eXhumer/qtbase-exmb/commit/c636844e2f6cd55890234989136cddbdf0b435f3.patch"
+        git apply c636844e2f6cd55890234989136cddbdf0b435f3.patch
+        rm c636844e2f6cd55890234989136cddbdf0b435f3.patch
     - name: Build Qt 6.2.4
       run: |
         cmake -B ../qt624-build -S ../qt624 -DCMAKE_INSTALL_PREFIX="../Qt/6.2.4/gcc_64" -DQT_QMAKE_TARGET_MKSPEC="linux-g++" -DCMAKE_BUILD_TYPE=Release -G Ninja
