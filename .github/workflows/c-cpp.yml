@@ -12,44 +12,45 @@ jobs:
       uses: actions/checkout@v2
     - name: Checkout project submodules
       run: git submodule update --init --recursive
-    - name: Get Qt 6.2.4 Source Code
+    - name: Get Qt 6.2.4
       run: |
-        cd ..\
-        git clone git://code.qt.io/qt/qt5.git qt624 --branch=6.2.4
-        cd .\qt624
+        git clone git://code.qt.io/qt/qt5.git ..\qt624 --branch=6.2.4
+    - name: Initialize Qt repositories
+      run: |
+        cd ..\qt624
         perl init-repository --module-subset=qtbase,qtnetworkauth,qttools,qtwebsockets
-        cd .\qtbase\
+    - name: Apply qtbase patch
+      run: |
+        cd ..\qt624\qtbase\
         Invoke-WebRequest -Uri "https://github.com/eXhumer/qtbase-exmb/commit/c636844e2f6cd55890234989136cddbdf0b435f3.patch" -OutFile .\qtbase.patch
         git apply .\qtbase.patch
         rm .\qtbase.patch
-    - name: Build OpenSSL 1.1.1n (NASM 2.15.05 | MSVC2019-x64)
+    - name: Get OpenSSL 1.1.1n
       run: |
-        $VSWHERE_PATH = "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe"
-        $DEV_CMD_ARGS = "-arch=amd64", "-host_arch=amd64", "-no_logo"
-        $MSVC2019_VSWHERE_INSTALL_PATH_ARGS = "-products", "*", "-requires", "Microsoft.VisualStudio.Component.VC.Tools.x86.x64", "-version", "[16.0,17.0)", "-property", "installationPath"
-        $MSVC2019_INSTALL_PATH = & $VSWHERE_PATH $MSVC2019_VSWHERE_INSTALL_PATH_ARGS
-        $MSVC2019_DEVSHELL_PATH = "$MSVC2019_INSTALL_PATH\Common7\Tools\Microsoft.VisualStudio.DevShell.dll"
-        Import-Module $MSVC2019_DEVSHELL_PATH
-        Enter-VsDevShell -VsInstallPath "$MSVC2019_INSTALL_PATH" -DevCmdArguments ($DEV_CMD_ARGS -join " ")
-        cd ../
-        git clone https://github.com/openssl/openssl.git --origin=openssl
-        cd openssl
+        git clone https://github.com/openssl/openssl.git ../openssl --origin=openssl
+        cd ../openssl
         git checkout OpenSSL_1_1_1n
-        mkdir ../OpenSSL-1.1.1n
-        mkdir ../OpenSSL-Dir
-        ${env:OPENSSL_PREFIX} = (Resolve-Path ..\OpenSSL-1.1.1n).Path
-        ${env:OPENSSL_DIR} = (Resolve-Path ..\OpenSSL-Dir).Path
+    - name: Get NASM 2.15.05
+      run: |
         $NASM_URL = "https://www.nasm.us/pub/nasm/releasebuilds/2.15.05/win64/nasm-2.15.05-win64.zip"
         Invoke-WebRequest -Uri $NASM_URL -OutFile ../NASM.zip
         cd ../
         Expand-Archive NASM.zip
-        ${env:NASM_PATH} = (Resolve-Path ./NASM/nasm-2.15.05/).Path
-        ${env:PATH} += ";${env:NASM_PATH}"
-        cd ./openssl/
-        perl Configure --openssldir=${env:OPENSSL_DIR} --prefix=${env:OPENSSL_PREFIX} VC-WIN64A
+    - name: Configure, Build & Install OpenSSL (NASM 2.15.05 | MSVC2019-x64)
+      run: |
+        ${env:PATH} += ";${(Resolve-Path ../NASM/nasm-2.15.05/).Path}"
+        $VSWHERE_PATH = "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe"
+        $DEV_CMD_ARGS = "-arch=amd64", "-host_arch=amd64", "-no_logo"
+        $MSVC2019_VSWHERE_INSTALL_PATH_ARGS = "-products", "*", "-requires", "Microsoft.VisualStudio.Component.VC.Tools.x86.x64", "-version", "[16.0,17.0)", "-property", "installationPath"
+        $MSVC2019_INSTALL_PATH = & $VSWHERE_PATH $MSVC2019_VSWHERE_INSTALL_PATH_ARGS
+        $MSVC2019_DEVSHELL_PATH = "$MSVC2019_INSTALL_PATH\Common7\Tools\Microsoft.VisualStudio.DevShell.dll"
+        Import-Module $MSVC2019_DEVSHELL_PATH
+        Enter-VsDevShell -VsInstallPath "$MSVC2019_INSTALL_PATH" -DevCmdArguments ($DEV_CMD_ARGS -join " ")
+        cd ..\openssl\
+        perl Configure --openssldir=..\OpenSSL-Dir --prefix=..\OpenSSL-1.1.1n VC-WIN64A
         nmake
         nmake install
-    - name: Build Qt 6.2.4 (MSVC2019-x64)
+    - name: Configure, Build & Install Qt 6.2.4 (MSVC2019-x64)
       run: |
         $VSWHERE_PATH = "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe"
         $DEV_CMD_ARGS = "-arch=amd64", "-host_arch=amd64", "-no_logo"
@@ -58,12 +59,11 @@ jobs:
         $MSVC2019_DEVSHELL_PATH = "$MSVC2019_INSTALL_PATH\Common7\Tools\Microsoft.VisualStudio.DevShell.dll"
         Import-Module $MSVC2019_DEVSHELL_PATH
         Enter-VsDevShell -VsInstallPath "$MSVC2019_INSTALL_PATH" -DevCmdArguments ($DEV_CMD_ARGS -join " ")
-        mkdir ..\qt624-shared
-        cd ..\qt624-shared
+        mkdir ..\qt624-shared && cd ..\qt624-shared
         ..\qt624\configure.bat -prefix ..\Qt\6.2.4\msvc2019_64 -platform win32-msvc -release -shared
         cmake --build . --parallel
         cmake --install .
-    - name: Build eXMB (Qt 6.2.4 | OpenSSL 1.1.1n | MSVC2019-x64)
+    - name: Configure, Build & Install eXMB (Qt 6.2.4 | OpenSSL 1.1.1n | MSVC2019-x64)
       env:
         REDDIT_CLIENT_ID: ${{ secrets.REDDIT_CLIENT_ID }}
       run: |
@@ -74,21 +74,13 @@ jobs:
         $MSVC2019_DEVSHELL_PATH = "$MSVC2019_INSTALL_PATH\Common7\Tools\Microsoft.VisualStudio.DevShell.dll"
         Import-Module $MSVC2019_DEVSHELL_PATH
         Enter-VsDevShell -VsInstallPath "$MSVC2019_INSTALL_PATH" -DevCmdArguments ($DEV_CMD_ARGS -join " ")
-        ${env:QT6_PREFIX} = (Resolve-Path ..\Qt\6.2.4\msvc2019_64).Path
-        ${env:CMAKE_PREFIX_PATH} = ${env:QT6_PREFIX}
-        mkdir ..\eXMB-build
-        ${env:EXMB_BUILD_PATH} = (Resolve-Path ..\eXMB-build).Path
-        mkdir ..\eXMB-ReleaseOut
-        ${env:EXMB_RELEASE_PATH} = (Resolve-Path ..\eXMB-ReleaseOut).Path
-        ${env:OPENSSL_PREFIX} = (Resolve-Path ..\OpenSSL-1.1.1n).Path
-        cmake -B "${env:EXMB_BUILD_PATH}" -S . -DREDDIT_CLIENT_ID="${env:REDDIT_CLIENT_ID}" -DCMAKE_INSTALL_PREFIX="${env:EXMB_RELEASE_PATH}" -DCMAKE_SYSTEM_VERSION="10.0.22000.0" -DOPENSSL_ROOT_DIR="${env:OPENSSL_PREFIX}"
-        cmake --build "${env:EXMB_BUILD_PATH}" --target ALL_BUILD --config Release --parallel
-        cmake --install "${env:EXMB_BUILD_PATH}"
-        echo "EXMB_RELEASE_PATH=${env:EXMB_RELEASE_PATH}" >> ${env:GITHUB_ENV}
+        ${env:CMAKE_PREFIX_PATH} = ${(Resolve-Path ..\Qt\6.2.4\msvc2019_64).Path}
+        cmake -B ..\eXMB-build -S . -DREDDIT_CLIENT_ID="${env:REDDIT_CLIENT_ID}" -DCMAKE_INSTALL_PREFIX="..\eXMB-ReleaseOut" -DCMAKE_SYSTEM_VERSION="10.0.22000.0" -DOPENSSL_ROOT_DIR="..\OpenSSL-1.1.1n"
+        cmake --build ..\eXMB-build --target ALL_BUILD --config Release --parallel
+        cmake --install ..\eXMB-build
+        echo "EXMB_RELEASE_PATH=${(Resolve-Path ..\eXMB-ReleaseOut).Path}" >> ${env:GITHUB_ENV}
     - name: Deploy Qt6 shared libraries with eXMB
       run: |
-        ${env:EXMB_RELEASE_PATH} = (Resolve-Path ..\eXMB-ReleaseOut).Path
-        ${env:QT6_PREFIX} = (Resolve-Path ..\Qt\6.2.4\msvc2019_64).Path
         $VSWHERE_PATH = "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe"
         $DEV_CMD_ARGS = "-arch=amd64", "-host_arch=amd64", "-no_logo"
         $MSVC2019_VSWHERE_INSTALL_PATH_ARGS = "-products", "*", "-requires", "Microsoft.VisualStudio.Component.VC.Tools.x86.x64", "-version", "[16.0,17.0)", "-property", "installationPath"
@@ -96,13 +88,11 @@ jobs:
         $MSVC2019_DEVSHELL_PATH = "$MSVC2019_INSTALL_PATH\Common7\Tools\Microsoft.VisualStudio.DevShell.dll"
         Import-Module $MSVC2019_DEVSHELL_PATH
         Enter-VsDevShell -VsInstallPath "$MSVC2019_INSTALL_PATH" -DevCmdArguments ($DEV_CMD_ARGS -join " ")
-        & "${env:QT6_PREFIX}\bin\windeployqt.exe" --release --no-translations ${env:EXMB_RELEASE_PATH}\bin\eXMB.exe
+        & ..\Qt\6.2.4\msvc2019_64\bin\windeployqt.exe --release --no-translation --no-compiler-runtime ..\eXMB-ReleaseOut\bin\eXMB.exe
     - name: Deploy OpenSSL shared libraries with eXMB
       run: |
-        ${env:EXMB_RELEASE_PATH} = (Resolve-Path ..\eXMB-ReleaseOut).Path
-        ${env:OPENSSL_PREFIX} = (Resolve-Path ..\OpenSSL-1.1.1n).Path
-        cp ${env:OPENSSL_PREFIX}\bin\libcrypto-1_1-x64.dll ${env:EXMB_RELEASE_PATH}\bin
-        cp ${env:OPENSSL_PREFIX}\bin\libssl-1_1-x64.dll ${env:EXMB_RELEASE_PATH}\bin
+        cp ..\OpenSSL-1.1.1n\bin\libcrypto-1_1-x64.dll ..\eXMB-ReleaseOut\bin
+        cp ..\OpenSSL-1.1.1n\bin\libssl-1_1-x64.dll ..\eXMB-ReleaseOut\bin
     - name: Upload build artifact
       uses: actions/upload-artifact@v2
       with:
@@ -115,44 +105,45 @@ jobs:
       uses: actions/checkout@v2
     - name: Checkout project submodules
       run: git submodule update --init --recursive
-    - name: Get Qt 6.2.4 Source Code
+    - name: Get Qt 6.2.4
       run: |
-        cd ..\
-        git clone git://code.qt.io/qt/qt5.git qt624 --branch=6.2.4
-        cd .\qt624
+        git clone git://code.qt.io/qt/qt5.git ..\qt624 --branch=6.2.4
+    - name: Initialize Qt repositories
+      run: |
+        cd ..\qt624
         perl init-repository --module-subset=qtbase,qtnetworkauth,qttools,qtwebsockets
-        cd .\qtbase\
+    - name: Apply qtbase patch
+      run: |
+        cd ..\qt624\qtbase\
         Invoke-WebRequest -Uri "https://github.com/eXhumer/qtbase-exmb/commit/c636844e2f6cd55890234989136cddbdf0b435f3.patch" -OutFile .\qtbase.patch
         git apply .\qtbase.patch
         rm .\qtbase.patch
-    - name: Build OpenSSL 1.1.1n (NASM 2.15.05 | MSVC2019-x64)
+    - name: Get OpenSSL 1.1.1n
       run: |
-        $VSWHERE_PATH = "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe"
-        $DEV_CMD_ARGS = "-arch=amd64", "-host_arch=amd64", "-no_logo"
-        $MSVC2019_VSWHERE_INSTALL_PATH_ARGS = "-products", "*", "-requires", "Microsoft.VisualStudio.Component.VC.Tools.x86.x64", "-version", "[16.0,17.0)", "-property", "installationPath"
-        $MSVC2019_INSTALL_PATH = & $VSWHERE_PATH $MSVC2019_VSWHERE_INSTALL_PATH_ARGS
-        $MSVC2019_DEVSHELL_PATH = "$MSVC2019_INSTALL_PATH\Common7\Tools\Microsoft.VisualStudio.DevShell.dll"
-        Import-Module $MSVC2019_DEVSHELL_PATH
-        Enter-VsDevShell -VsInstallPath "$MSVC2019_INSTALL_PATH" -DevCmdArguments ($DEV_CMD_ARGS -join " ")
-        cd ../
-        git clone https://github.com/openssl/openssl.git --origin=openssl
-        cd openssl
+        git clone https://github.com/openssl/openssl.git ../openssl --origin=openssl
+        cd ../openssl
         git checkout OpenSSL_1_1_1n
-        mkdir ../OpenSSL-1.1.1n
-        mkdir ../OpenSSL-Dir
-        ${env:OPENSSL_PREFIX} = (Resolve-Path ..\OpenSSL-1.1.1n).Path
-        ${env:OPENSSL_DIR} = (Resolve-Path ..\OpenSSL-Dir).Path
+    - name: Get NASM 2.15.05
+      run: |
         $NASM_URL = "https://www.nasm.us/pub/nasm/releasebuilds/2.15.05/win64/nasm-2.15.05-win64.zip"
         Invoke-WebRequest -Uri $NASM_URL -OutFile ../NASM.zip
         cd ../
         Expand-Archive NASM.zip
-        ${env:NASM_PATH} = (Resolve-Path ./NASM/nasm-2.15.05/).Path
-        ${env:PATH} += ";${env:NASM_PATH}"
-        cd ./openssl/
-        perl Configure --openssldir=${env:OPENSSL_DIR} --prefix=${env:OPENSSL_PREFIX} VC-WIN64A
+    - name: Configure, Build & Install OpenSSL (NASM 2.15.05 | MSVC2019-x64)
+      run: |
+        ${env:PATH} += ";${(Resolve-Path ../NASM/nasm-2.15.05/).Path}"
+        $VSWHERE_PATH = "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe"
+        $DEV_CMD_ARGS = "-arch=amd64", "-host_arch=amd64", "-no_logo"
+        $MSVC2019_VSWHERE_INSTALL_PATH_ARGS = "-products", "*", "-requires", "Microsoft.VisualStudio.Component.VC.Tools.x86.x64", "-version", "[16.0,17.0)", "-property", "installationPath"
+        $MSVC2019_INSTALL_PATH = & $VSWHERE_PATH $MSVC2019_VSWHERE_INSTALL_PATH_ARGS
+        $MSVC2019_DEVSHELL_PATH = "$MSVC2019_INSTALL_PATH\Common7\Tools\Microsoft.VisualStudio.DevShell.dll"
+        Import-Module $MSVC2019_DEVSHELL_PATH
+        Enter-VsDevShell -VsInstallPath "$MSVC2019_INSTALL_PATH" -DevCmdArguments ($DEV_CMD_ARGS -join " ")
+        cd ..\openssl\
+        perl Configure --openssldir=..\OpenSSL-Dir --prefix=..\OpenSSL-1.1.1n VC-WIN64A
         nmake
         nmake install
-    - name: Build Qt 6.2.4 (MSVC2019-x64)
+    - name: Configure, Build & Install Qt 6.2.4 (MSVC2019-x64)
       run: |
         $VSWHERE_PATH = "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe"
         $DEV_CMD_ARGS = "-arch=amd64", "-host_arch=amd64", "-no_logo"
@@ -161,12 +152,11 @@ jobs:
         $MSVC2019_DEVSHELL_PATH = "$MSVC2019_INSTALL_PATH\Common7\Tools\Microsoft.VisualStudio.DevShell.dll"
         Import-Module $MSVC2019_DEVSHELL_PATH
         Enter-VsDevShell -VsInstallPath "$MSVC2019_INSTALL_PATH" -DevCmdArguments ($DEV_CMD_ARGS -join " ")
-        mkdir ..\qt624-static
-        cd ..\qt624-static
+        mkdir ..\qt624-static && cd ..\qt624-static
         ..\qt624\configure.bat -prefix ..\Qt\6.2.4\msvc2019_64 -platform win32-msvc -release -static
         cmake --build . --parallel
         cmake --install .
-    - name: Build eXMB (Qt 6.2.4 | OpenSSL 1.1.1n | MSVC2019-x64)
+    - name: Configure, Build & Install eXMB (Qt 6.2.4 | OpenSSL 1.1.1n | MSVC2019-x64)
       env:
         REDDIT_CLIENT_ID: ${{ secrets.REDDIT_CLIENT_ID }}
       run: |
@@ -177,17 +167,11 @@ jobs:
         $MSVC2019_DEVSHELL_PATH = "$MSVC2019_INSTALL_PATH\Common7\Tools\Microsoft.VisualStudio.DevShell.dll"
         Import-Module $MSVC2019_DEVSHELL_PATH
         Enter-VsDevShell -VsInstallPath "$MSVC2019_INSTALL_PATH" -DevCmdArguments ($DEV_CMD_ARGS -join " ")
-        ${env:QT6_PREFIX} = (Resolve-Path ..\Qt\6.2.4\msvc2019_64).Path
-        ${env:CMAKE_PREFIX_PATH} = ${env:QT6_PREFIX}
-        mkdir ..\eXMB-build
-        ${env:EXMB_BUILD_PATH} = (Resolve-Path ..\eXMB-build).Path
-        mkdir ..\eXMB-ReleaseOut
-        ${env:EXMB_RELEASE_PATH} = (Resolve-Path ..\eXMB-ReleaseOut).Path
-        ${env:OPENSSL_PREFIX} = (Resolve-Path ..\OpenSSL-1.1.1n).Path
-        cmake -B "${env:EXMB_BUILD_PATH}" -S . -DREDDIT_CLIENT_ID="${env:REDDIT_CLIENT_ID}" -DCMAKE_INSTALL_PREFIX="${env:EXMB_RELEASE_PATH}" -DCMAKE_SYSTEM_VERSION="10.0.22000.0" -DOPENSSL_ROOT_DIR="${env:OPENSSL_PREFIX}"
-        cmake --build "${env:EXMB_BUILD_PATH}" --target ALL_BUILD --config Release --parallel
-        cmake --install "${env:EXMB_BUILD_PATH}"
-        echo "EXMB_RELEASE_PATH=${env:EXMB_RELEASE_PATH}" >> ${env:GITHUB_ENV}
+        ${env:CMAKE_PREFIX_PATH} = ${(Resolve-Path ..\Qt\6.2.4\msvc2019_64).Path}
+        cmake -B ..\eXMB-build -S . -DREDDIT_CLIENT_ID="${env:REDDIT_CLIENT_ID}" -DCMAKE_INSTALL_PREFIX="..\eXMB-ReleaseOut" -DCMAKE_SYSTEM_VERSION="10.0.22000.0" -DOPENSSL_ROOT_DIR="..\OpenSSL-1.1.1n"
+        cmake --build ..\eXMB-build --target ALL_BUILD --config Release --parallel
+        cmake --install ..\eXMB-build
+        echo "EXMB_RELEASE_PATH=${(Resolve-Path ..\eXMB-ReleaseOut).Path}" >> ${env:GITHUB_ENV}
     - name: Upload build artifact
       uses: actions/upload-artifact@v2
       with:
