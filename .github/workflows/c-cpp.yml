@@ -78,7 +78,7 @@ jobs:
         $MSVC2019_DEVSHELL_PATH = "$MSVC2019_INSTALL_PATH\Common7\Tools\Microsoft.VisualStudio.DevShell.dll"
         Import-Module $MSVC2019_DEVSHELL_PATH
         Enter-VsDevShell -VsInstallPath "$MSVC2019_INSTALL_PATH" -DevCmdArguments ($DEV_CMD_ARGS -join " ")
-        ${env:CMAKE_PREFIX_PATH} = ${(Resolve-Path ..\Qt\6.2.4\msvc2019_64).Path}
+        ${env:CMAKE_PREFIX_PATH} = (Resolve-Path ..\Qt\6.2.4\msvc2019_64).Path
         cmake -B ..\eXMB-build -S . -DREDDIT_CLIENT_ID="${env:REDDIT_CLIENT_ID}" -DCMAKE_INSTALL_PREFIX="..\eXMB-ReleaseOut" -DCMAKE_SYSTEM_VERSION="10.0.22000.0" -DOPENSSL_ROOT_DIR="..\OpenSSL-1.1.1n"
         cmake --build ..\eXMB-build --target ALL_BUILD --config Release --parallel
         cmake --install ..\eXMB-build
@@ -175,7 +175,7 @@ jobs:
         $MSVC2019_DEVSHELL_PATH = "$MSVC2019_INSTALL_PATH\Common7\Tools\Microsoft.VisualStudio.DevShell.dll"
         Import-Module $MSVC2019_DEVSHELL_PATH
         Enter-VsDevShell -VsInstallPath "$MSVC2019_INSTALL_PATH" -DevCmdArguments ($DEV_CMD_ARGS -join " ")
-        ${env:CMAKE_PREFIX_PATH} = ${(Resolve-Path ..\Qt\6.2.4\msvc2019_64).Path}
+        ${env:CMAKE_PREFIX_PATH} = (Resolve-Path ..\Qt\6.2.4\msvc2019_64).Path
         cmake -B ..\eXMB-build -S . -DREDDIT_CLIENT_ID="${env:REDDIT_CLIENT_ID}" -DCMAKE_INSTALL_PREFIX="..\eXMB-ReleaseOut" -DCMAKE_SYSTEM_VERSION="10.0.22000.0" -DOPENSSL_ROOT_DIR="..\OpenSSL-1.1.1n"
         cmake --build ..\eXMB-build --target ALL_BUILD --config Release --parallel
         cmake --install ..\eXMB-build
