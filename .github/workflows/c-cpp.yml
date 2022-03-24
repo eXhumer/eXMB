@@ -93,7 +93,7 @@ jobs:
         $MSVC2019_DEVSHELL_PATH = "$MSVC2019_INSTALL_PATH\Common7\Tools\Microsoft.VisualStudio.DevShell.dll"
         Import-Module $MSVC2019_DEVSHELL_PATH
         Enter-VsDevShell -VsInstallPath "$MSVC2019_INSTALL_PATH" -DevCmdArguments ($DEV_CMD_ARGS -join " ")
-        & ..\Qt\6.2.4\msvc2019_64\bin\windeployqt.exe --release --no-translation --no-compiler-runtime ..\eXMB-ReleaseOut\bin\eXMB.exe
+        & ..\Qt\6.2.4\msvc2019_64\bin\windeployqt.exe --release --no-translations --no-compiler-runtime ..\eXMB-ReleaseOut\bin\eXMB.exe
     - name: Deploy OpenSSL shared libraries with eXMB
       run: |
         cp ..\OpenSSL-1.1.1n\bin\libcrypto-1_1-x64.dll ..\eXMB-ReleaseOut\bin
