@@ -27,6 +27,7 @@ class MediaService;
 #include <QGroupBox>
 #include <QLineEdit>
 #include <QMainWindow>
+#include <QMessageBox>
 #include <QNetworkReply>
 #include <QProgressBar>
 #include <QPushButton>

@@ -25,7 +25,6 @@
 #include <QLabel>
 #include <QLineEdit>
 #include <QMenuBar>
-#include <QMessageBox>
 #include <QStandardPaths>
 #include <QVBoxLayout>
 #ifdef WIN32
