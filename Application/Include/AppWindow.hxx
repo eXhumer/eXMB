@@ -32,6 +32,7 @@ class MediaService;
 #include <QGroupBox>
 #include <QLineEdit>
 #include <QMainWindow>
+#include <QMessageBox>
 #include <QNetworkReply>
 #include <QProgressBar>
 #include <QPushButton>
@@ -58,6 +59,11 @@ private:
   void setupMenuBar();
   void setupServices(const QString &redditClientId);
   void setupWidgets();
+  QMessageBox *CreateMessageBox(QMessageBox::Icon icon, const QString &title,
+                                const QString &text,
+                                QMessageBox::StandardButtons buttons =
+                                    QMessageBox::StandardButton::NoButton,
+                                QWidget *parent = nullptr);
 
 public:
   AppWindow(const QString &redditClientId, QWidget *parent = nullptr);

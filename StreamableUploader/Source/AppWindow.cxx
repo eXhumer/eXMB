@@ -61,18 +61,17 @@ void SetDarkModeStatus(bool useDarkMode, HWND winId) {
 }
 #endif // WIN32
 
-QMessageBox *CreateMessageBox(QMessageBox::Icon icon, const QString &title,
-                              const QString &text,
-                              QMessageBox::StandardButtons buttons =
-                                  QMessageBox::StandardButton::NoButton,
-                              QWidget *parent = nullptr) {
+QMessageBox *AppWindow::CreateMessageBox(QMessageBox::Icon icon,
+                                         const QString &title,
+                                         const QString &text,
+                                         QMessageBox::StandardButtons buttons,
+                                         QWidget *parent) {
   QMessageBox *msgBox = new QMessageBox(icon, title, text, buttons, parent);
 #ifdef WIN32
-  BOOL IsDarkTheme = IsWindowsDarkMode();
-  SetDarkModeStatus(IsDarkTheme, HWND(msgBox->winId()));
+  SetDarkModeStatus(this->m_darkMode, HWND(msgBox->winId()));
 
   QTimer *themeChangeTimer = new QTimer(msgBox);
-  bool darkMode = IsDarkTheme;
+  bool darkMode = this->m_darkMode;
   themeChangeTimer->connect(
       themeChangeTimer, &QTimer::timeout, msgBox, [msgBox, &darkMode]() {
         bool newDarkMode = darkMode;

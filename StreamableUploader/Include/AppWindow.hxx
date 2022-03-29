@@ -48,6 +48,11 @@ private:
   void setupMenuBar();
   void setupServices();
   void setupWidgets();
+  QMessageBox *CreateMessageBox(QMessageBox::Icon icon, const QString &title,
+                                const QString &text,
+                                QMessageBox::StandardButtons buttons =
+                                    QMessageBox::StandardButton::NoButton,
+                                QWidget *parent = nullptr);
 
 public:
   AppWindow(QWidget *parent = nullptr);
