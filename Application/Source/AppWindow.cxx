@@ -470,71 +470,64 @@ void AppWindow::onVideoFileSelectAndUpload() {
             m_uploadProgress->setValue(bytesSent);
             m_uploadProgress->setMaximum(bytesTotal);
           }
-        },
-        Qt::UniqueConnection);
+        });
 
     connect(
         m_media, &eXVHP::Service::MediaService::mediaUploaded, videoCtx,
         [this, videoCtx, videoFile](QFile *vidFile, const QString &videoId,
                                     const QString &videoLink) {
           if (videoFile == vidFile) {
-            connect(
-                m_red, &eXRC::Service::Reddit::postedUrl, videoCtx,
-                [this, videoCtx, videoLink](const QString &postUrl,
-                                            const QString &redditUrl) {
-                  if (postUrl == videoLink) {
-                    QMessageBox *videoLinkMsgBox = new QMessageBox(
-                        QMessageBox::NoIcon, "Video Posted Successfully!",
-                        "Posted <a href=\"" + postUrl +
-                            "\">Video</a> to <a href=\"" + redditUrl +
-                            "\">Reddit</a>!",
-                        QMessageBox::Ok, this);
-                    QIcon icon = videoLinkMsgBox->windowIcon();
-                    QSize size = icon.actualSize(QSize(64, 64));
-                    videoLinkMsgBox->setIconPixmap(icon.pixmap(size));
-                    videoLinkMsgBox->exec();
-                    videoLinkMsgBox->deleteLater();
-                    videoCtx->deleteLater();
-                  }
-                },
-                Qt::UniqueConnection);
-            connect(
-                m_red, &eXRC::Service::Reddit::postUrlError, videoCtx,
-                [this, videoCtx, videoLink](const QString &postUrl,
-                                            const QString &error) {
-                  if (postUrl == videoLink) {
-                    QMessageBox *msgBox = CreateMessageBox(
-                        QMessageBox::Warning, "Reddit Media Post Error!",
-                        "Error while posting media link to Reddit!\n" + error,
-                        QMessageBox::Ok, this);
-                    msgBox->exec();
-                    msgBox->deleteLater();
-                    videoCtx->deleteLater();
-                  }
-                },
-                Qt::UniqueConnection);
+            connect(m_red, &eXRC::Service::Reddit::postedUrl, videoCtx,
+                    [this, videoCtx, videoLink](const QString &postUrl,
+                                                const QString &redditUrl) {
+                      if (postUrl == videoLink) {
+                        QMessageBox *videoLinkMsgBox = new QMessageBox(
+                            QMessageBox::NoIcon, "Video Posted Successfully!",
+                            "Posted <a href=\"" + postUrl +
+                                "\">Video</a> to <a href=\"" + redditUrl +
+                                "\">Reddit</a>!",
+                            QMessageBox::Ok, this);
+                        QIcon icon = videoLinkMsgBox->windowIcon();
+                        QSize size = icon.actualSize(QSize(64, 64));
+                        videoLinkMsgBox->setIconPixmap(icon.pixmap(size));
+                        videoLinkMsgBox->exec();
+                        videoLinkMsgBox->deleteLater();
+                        videoCtx->deleteLater();
+                      }
+                    });
+            connect(m_red, &eXRC::Service::Reddit::postUrlError, videoCtx,
+                    [this, videoCtx, videoLink](const QString &postUrl,
+                                                const QString &error) {
+                      if (postUrl == videoLink) {
+                        QMessageBox *msgBox = CreateMessageBox(
+                            QMessageBox::Warning, "Reddit Media Post Error!",
+                            "Error while posting media link to Reddit!\n" +
+                                error,
+                            QMessageBox::Ok, this);
+                        msgBox->exec();
+                        msgBox->deleteLater();
+                        videoCtx->deleteLater();
+                      }
+                    });
 
             m_red->postUrl(videoLink, m_titleLE->text(), m_subredditLE->text(),
                            m_flairLE->text(), m_postSRCB->isChecked(),
                            m_postNSFWCB->isChecked(),
                            m_postSpoilerCB->isChecked());
           }
-        },
-        Qt::UniqueConnection);
+        });
 
-    connect(
-        m_media, &eXVHP::Service::MediaService::mediaUploadError, videoCtx,
-        [this, videoCtx, videoFile](QFile *vidFile, const QString &error) {
-          if (videoFile == vidFile) {
-            QMessageBox *msgBox =
-                CreateMessageBox(QMessageBox::Warning, "Media Upload Error",
-                                 error, QMessageBox::Ok, this);
-            msgBox->exec();
-            msgBox->deleteLater();
-            videoCtx->deleteLater();
-          }
-        },
-        Qt::UniqueConnection);
+    connect(m_media, &eXVHP::Service::MediaService::mediaUploadError, videoCtx,
+            [this, videoCtx, videoFile](QFile *vidFile, const QString &error) {
+              if (videoFile == vidFile) {
+                QMessageBox *msgBox =
+                    CreateMessageBox(QMessageBox::Warning, "Media Upload Error",
+                                     error, QMessageBox::Ok, this);
+                msgBox->exec();
+                msgBox->deleteLater();
+                videoCtx->deleteLater();
+              }
+            });
 
     if (m_jslRB->isChecked())
       m_media->uploadJustStreamLive(videoFile);

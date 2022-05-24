@@ -191,42 +191,37 @@ void AppWindow::onVideoFileSelectAndUpload() {
           m_uploadProgress->setValue(bytesSent);
           m_uploadProgress->setMaximum(bytesTotal);
         }
-      },
-      Qt::UniqueConnection);
+      });
 
-  connect(
-      m_media, &eXVHP::Service::MediaService::mediaUploaded, videoCtx,
-      [this, videoCtx, videoFile](QFile *vidFile, const QString &videoId,
-                                  const QString &videoLink) {
-        if (videoFile == vidFile) {
-          QMessageBox *videoLinkMsgBox = CreateMessageBox(
-              QMessageBox::NoIcon, "Video Posted Successfully!",
-              "<a href=\"" + videoLink + "\">Video Link</a>", QMessageBox::Ok,
-              this);
+  connect(m_media, &eXVHP::Service::MediaService::mediaUploaded, videoCtx,
+          [this, videoCtx, videoFile](QFile *vidFile, const QString &videoId,
+                                      const QString &videoLink) {
+            if (videoFile == vidFile) {
+              QMessageBox *videoLinkMsgBox = CreateMessageBox(
+                  QMessageBox::NoIcon, "Video Posted Successfully!",
+                  "<a href=\"" + videoLink + "\">Video Link</a>",
+                  QMessageBox::Ok, this);
 
-          QIcon icon = videoLinkMsgBox->windowIcon();
-          QSize size = icon.actualSize(QSize(64, 64));
-          videoLinkMsgBox->setIconPixmap(icon.pixmap(size));
-          videoLinkMsgBox->exec();
-          videoLinkMsgBox->deleteLater();
-          videoCtx->deleteLater();
-        }
-      },
-      Qt::UniqueConnection);
+              QIcon icon = videoLinkMsgBox->windowIcon();
+              QSize size = icon.actualSize(QSize(64, 64));
+              videoLinkMsgBox->setIconPixmap(icon.pixmap(size));
+              videoLinkMsgBox->exec();
+              videoLinkMsgBox->deleteLater();
+              videoCtx->deleteLater();
+            }
+          });
 
-  connect(
-      m_media, &eXVHP::Service::MediaService::mediaUploadError, videoCtx,
-      [this, videoCtx, videoFile](QFile *vidFile, const QString &error) {
-        if (videoFile == vidFile) {
-          QMessageBox *videoLinkMsgBox =
-              CreateMessageBox(QMessageBox::Warning, "Media Upload Error",
-                               error, QMessageBox::Ok, this);
-          videoLinkMsgBox->exec();
-          videoLinkMsgBox->deleteLater();
-          videoCtx->deleteLater();
-        }
-      },
-      Qt::UniqueConnection);
+  connect(m_media, &eXVHP::Service::MediaService::mediaUploadError, videoCtx,
+          [this, videoCtx, videoFile](QFile *vidFile, const QString &error) {
+            if (videoFile == vidFile) {
+              QMessageBox *videoLinkMsgBox =
+                  CreateMessageBox(QMessageBox::Warning, "Media Upload Error",
+                                   error, QMessageBox::Ok, this);
+              videoLinkMsgBox->exec();
+              videoLinkMsgBox->deleteLater();
+              videoCtx->deleteLater();
+            }
+          });
 
   m_media->uploadStreamable(videoFile, m_titleLE->text(), "us-east-1");
 }
