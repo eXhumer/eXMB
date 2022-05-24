@@ -8,13 +8,13 @@ Reddit media poster via external media hosting platforms. The video file is uplo
 
 ## Supported Media Hosting Platforms
 * JustStreamLive
+* Reddit
 * Streamable
 * Streamff
-* Streamgg
 * Streamja
 
 ## Build Requirements
-The application requires Qt6 (Tested working with Qt v6.2.3) / CMake (v3.22.0).
+The application requires Qt6 (Tested working with Qt v6.3.0) / CMake (v3.23.1).
 
 ## Licensing
 This project is licensed under OSI Approved [GNU GPLv3 **ONLY**](https://github.com/eXhumer/eXMB/blob/qt6-cmake/LICENSE.md).

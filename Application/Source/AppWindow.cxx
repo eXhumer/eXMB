@@ -128,7 +128,6 @@ void AppWindow::setupCentralWidget() {
   postHostLayout->addWidget(m_redRB);
   postHostLayout->addWidget(m_sabRB);
   postHostLayout->addWidget(m_sffRB);
-  postHostLayout->addWidget(m_sggRB);
   postHostLayout->addWidget(m_sjaRB);
   postLayout->addLayout(postHostLayout);
   postOptsLayout->addWidget(m_postNSFWCB, 0, Qt::AlignHCenter);
@@ -301,7 +300,6 @@ void AppWindow::setupWidgets() {
   m_redRB = new QRadioButton("Reddit");
   m_sabRB = new QRadioButton("Streamable");
   m_sffRB = new QRadioButton("Streamff");
-  m_sggRB = new QRadioButton("Streamgg");
   m_sjaRB = new QRadioButton("Streamja");
   m_postNSFWCB = new QCheckBox("NSFW?");
   m_postSRCB = new QCheckBox("Send Replies?");
@@ -323,7 +321,6 @@ void AppWindow::enableWidgets() {
   m_redRB->setEnabled(true);
   m_sabRB->setEnabled(true);
   m_sffRB->setEnabled(true);
-  m_sggRB->setEnabled(true);
   m_sjaRB->setEnabled(true);
   m_postNSFWCB->setEnabled(true);
   m_postSpoilerCB->setEnabled(true);
@@ -345,7 +342,6 @@ void AppWindow::disableWidgets() {
   m_redRB->setDisabled(true);
   m_sabRB->setDisabled(true);
   m_sffRB->setDisabled(true);
-  m_sggRB->setDisabled(true);
   m_sjaRB->setDisabled(true);
   m_postNSFWCB->setDisabled(true);
   m_postSpoilerCB->setDisabled(true);
@@ -429,7 +425,7 @@ void AppWindow::onVideoFileSelectAndUpload() {
 
   bool hostSelected = m_jslRB->isChecked() || m_redRB->isChecked() ||
                       m_sabRB->isChecked() || m_sffRB->isChecked() ||
-                      m_sggRB->isChecked() || m_sjaRB->isChecked();
+                      m_sjaRB->isChecked();
 
   if (!hostSelected) {
     QMessageBox *msgBox = CreateMessageBox(
@@ -449,7 +445,7 @@ void AppWindow::onVideoFileSelectAndUpload() {
   else if (m_redRB->isChecked() || m_sabRB->isChecked())
     filter = "Supported Video Files (*.mkv *.mp4)";
 
-  else if (m_sffRB->isChecked() || m_sggRB->isChecked() || m_sjaRB->isChecked())
+  else if (m_sffRB->isChecked() || m_sjaRB->isChecked())
     filter = "Supported Video Files (*.mp4)";
 
   QString videoFilePath = QFileDialog::getOpenFileName(
@@ -462,7 +458,7 @@ void AppWindow::onVideoFileSelectAndUpload() {
   QObject *videoCtx = new QObject;
 
   if (m_jslRB->isChecked() || m_sabRB->isChecked() || m_sffRB->isChecked() ||
-      m_sggRB->isChecked() || m_sjaRB->isChecked()) {
+      m_sjaRB->isChecked()) {
     connect(
         m_media, &eXVHP::Service::MediaService::mediaUploadProgress, videoCtx,
         [this, videoFile](QFile *vidFile, qint64 bytesSent, qint64 bytesTotal) {
@@ -537,9 +533,6 @@ void AppWindow::onVideoFileSelectAndUpload() {
 
     else if (m_sffRB->isChecked())
       m_media->uploadStreamff(videoFile);
-
-    else if (m_sggRB->isChecked())
-      m_media->uploadStreamgg(videoFile);
 
     else if (m_sjaRB->isChecked())
       m_media->uploadStreamja(videoFile);

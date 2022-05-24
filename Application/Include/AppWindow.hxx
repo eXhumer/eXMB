@@ -54,7 +54,7 @@ private:
   QLineEdit *m_subredditLE, *m_titleLE, *m_flairLE, *m_authStateLE;
   QProgressBar *m_uploadProgress;
   QPushButton *m_authBtn, *m_revokeBtn, *m_videoSelectBtn;
-  QRadioButton *m_jslRB, *m_redRB, *m_sabRB, *m_sffRB, *m_sggRB, *m_sjaRB;
+  QRadioButton *m_jslRB, *m_redRB, *m_sabRB, *m_sffRB, *m_sjaRB;
   void setupCentralWidget();
   void setupMenuBar();
   void setupServices(const QString &redditClientId);
