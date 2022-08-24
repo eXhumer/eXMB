@@ -5,31 +5,31 @@ on:
   pull_request:
     branches: [ qt6-cmake ]
 jobs:
-  win32-qt631-msvc2022_64-shared:
+  win32-qt632-msvc2022_64-shared:
     runs-on: windows-2022
     steps:
     - name: Checkout project source code
       uses: actions/checkout@v2
     - name: Checkout project submodules
       run: git submodule update --init --recursive
-    - name: Get Qt 6.3.1
+    - name: Get Qt 6.3.2
       run: |
-        git clone git://code.qt.io/qt/qt5.git ..\qt631 --branch=6.3.1
+        git clone git://code.qt.io/qt/qt5.git ..\qt632 --branch=6.3.2
     - name: Initialize Qt repositories
       run: |
-        cd ..\qt631
+        cd ..\qt632
         perl init-repository --module-subset=qtbase,qtnetworkauth,qttools,qtwebsockets
     - name: Apply qtbase patch
       run: |
-        cd ..\qt631\qtbase\
-        Invoke-WebRequest -Uri "https://github.com/eXhumer/qtbase-exmb/commit/689036d65a20178963b66916888ecdd37b3f3979.patch" -OutFile .\qtbase.patch
+        cd ..\qt632\qtbase\
+        Invoke-WebRequest -Uri "https://github.com/eXhumer/qtbase-exmb/commit/612cedbe3faa6fc368d335bf8a422bc20b11e48b.patch" -OutFile .\qtbase.patch
         git apply .\qtbase.patch
         rm .\qtbase.patch
-    - name: Get OpenSSL 1.1.1p
+    - name: Get OpenSSL 1.1.1q
       run: |
         git clone https://github.com/openssl/openssl.git ../openssl --origin=openssl
         cd ../openssl
-        git checkout OpenSSL_1_1_1p
+        git checkout OpenSSL_1_1_1q
     - name: Get NASM 2.15.05
       run: |
         $NASM_URL = "https://www.nasm.us/pub/nasm/releasebuilds/2.15.05/win64/nasm-2.15.05-win64.zip"
@@ -48,13 +48,13 @@ jobs:
         Import-Module $MSVC2022_DEVSHELL_PATH
         Enter-VsDevShell -VsInstallPath "$MSVC2022_INSTALL_PATH" -DevCmdArguments ($DEV_CMD_ARGS -join " ")
         cd ..\openssl\
-        mkdir ..\OpenSSL-1.1.1p\ && mkdir ..\OpenSSL-Dir\
+        mkdir ..\OpenSSL-1.1.1q\ && mkdir ..\OpenSSL-Dir\
         ${env:OPENSSL_DIR} = (Resolve-Path ..\OpenSSL-Dir).Path
-        ${env:OPENSSL_PREFIX} = (Resolve-Path ..\OpenSSL-1.1.1p).Path
+        ${env:OPENSSL_PREFIX} = (Resolve-Path ..\OpenSSL-1.1.1q).Path
         perl Configure --openssldir=${env:OPENSSL_DIR} --prefix=${env:OPENSSL_PREFIX} VC-WIN64A
         nmake
         nmake install
-    - name: Configure, Build & Install Qt 6.3.1 (MSVC2022-x64)
+    - name: Configure, Build & Install Qt 6.3.2 (MSVC2022-x64)
       run: |
         $VSWHERE_PATH = "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe"
         $DEV_CMD_ARGS = "-arch=amd64", "-host_arch=amd64", "-no_logo"
@@ -63,11 +63,11 @@ jobs:
         $MSVC2022_DEVSHELL_PATH = "$MSVC2022_INSTALL_PATH\Common7\Tools\Microsoft.VisualStudio.DevShell.dll"
         Import-Module $MSVC2022_DEVSHELL_PATH
         Enter-VsDevShell -VsInstallPath "$MSVC2022_INSTALL_PATH" -DevCmdArguments ($DEV_CMD_ARGS -join " ")
-        mkdir ..\qt631-shared && cd ..\qt631-shared
-        ..\qt631\configure.bat -prefix ..\Qt\6.3.1\msvc2022_64 -platform win32-msvc -release -shared
+        mkdir ..\qt632-shared && cd ..\qt632-shared
+        ..\qt632\configure.bat -prefix ..\Qt\6.3.2\msvc2022_64 -platform win32-msvc -release -shared
         cmake --build . --parallel
         cmake --install .
-    - name: Configure, Build & Install eXMB (Qt 6.3.1 | OpenSSL 1.1.1p | MSVC2022-x64)
+    - name: Configure, Build & Install eXMB (Qt 6.3.2 | OpenSSL 1.1.1q | MSVC2022-x64)
       env:
         REDDIT_CLIENT_ID: ${{ secrets.REDDIT_CLIENT_ID }}
       run: |
@@ -78,8 +78,8 @@ jobs:
         $MSVC2022_DEVSHELL_PATH = "$MSVC2022_INSTALL_PATH\Common7\Tools\Microsoft.VisualStudio.DevShell.dll"
         Import-Module $MSVC2022_DEVSHELL_PATH
         Enter-VsDevShell -VsInstallPath "$MSVC2022_INSTALL_PATH" -DevCmdArguments ($DEV_CMD_ARGS -join " ")
-        ${env:CMAKE_PREFIX_PATH} = (Resolve-Path ..\Qt\6.3.1\msvc2022_64).Path
-        cmake -B ..\eXMB-build -S . -DREDDIT_CLIENT_ID="${env:REDDIT_CLIENT_ID}" -DCMAKE_INSTALL_PREFIX="..\eXMB-ReleaseOut" -DCMAKE_SYSTEM_VERSION="10.0.22000.0" -DOPENSSL_ROOT_DIR="..\OpenSSL-1.1.1p"
+        ${env:CMAKE_PREFIX_PATH} = (Resolve-Path ..\Qt\6.3.2\msvc2022_64).Path
+        cmake -B ..\eXMB-build -S . -DREDDIT_CLIENT_ID="${env:REDDIT_CLIENT_ID}" -DCMAKE_INSTALL_PREFIX="..\eXMB-ReleaseOut" -DCMAKE_SYSTEM_VERSION="10.0.22000.0" -DOPENSSL_ROOT_DIR="..\OpenSSL-1.1.1q"
         cmake --build ..\eXMB-build --target ALL_BUILD --config Release --parallel
         cmake --install ..\eXMB-build
         ${env:EXMB_RELEASE_PATH} = (Resolve-Path ..\eXMB-ReleaseOut).Path
@@ -93,41 +93,41 @@ jobs:
         $MSVC2022_DEVSHELL_PATH = "$MSVC2022_INSTALL_PATH\Common7\Tools\Microsoft.VisualStudio.DevShell.dll"
         Import-Module $MSVC2022_DEVSHELL_PATH
         Enter-VsDevShell -VsInstallPath "$MSVC2022_INSTALL_PATH" -DevCmdArguments ($DEV_CMD_ARGS -join " ")
-        & ..\Qt\6.3.1\msvc2022_64\bin\windeployqt.exe --release --no-translations --no-compiler-runtime ..\eXMB-ReleaseOut\bin\eXMB.exe
+        & ..\Qt\6.3.2\msvc2022_64\bin\windeployqt.exe --release --no-translations --no-compiler-runtime ..\eXMB-ReleaseOut\bin\eXMB.exe
     - name: Deploy OpenSSL shared libraries with eXMB
       run: |
-        cp ..\OpenSSL-1.1.1p\bin\libcrypto-1_1-x64.dll ..\eXMB-ReleaseOut\bin
-        cp ..\OpenSSL-1.1.1p\bin\libssl-1_1-x64.dll ..\eXMB-ReleaseOut\bin
+        cp ..\OpenSSL-1.1.1q\bin\libcrypto-1_1-x64.dll ..\eXMB-ReleaseOut\bin
+        cp ..\OpenSSL-1.1.1q\bin\libssl-1_1-x64.dll ..\eXMB-ReleaseOut\bin
     - name: Upload build artifact
       uses: actions/upload-artifact@v2
       with:
-        name: win32-qt631-msvc2022_64-shared
+        name: win32-qt632-msvc2022_64-shared
         path: ${{ env.EXMB_RELEASE_PATH }}
-  win32-qt631-msvc2022_64-static:
+  win32-qt632-msvc2022_64-static:
     runs-on: windows-2022
     steps:
     - name: Checkout project source code
       uses: actions/checkout@v2
     - name: Checkout project submodules
       run: git submodule update --init --recursive
-    - name: Get Qt 6.3.1
+    - name: Get Qt 6.3.2
       run: |
-        git clone git://code.qt.io/qt/qt5.git ..\qt631 --branch=6.3.1
+        git clone git://code.qt.io/qt/qt5.git ..\qt632 --branch=6.3.2
     - name: Initialize Qt repositories
       run: |
-        cd ..\qt631
+        cd ..\qt632
         perl init-repository --module-subset=qtbase,qtnetworkauth,qttools,qtwebsockets
     - name: Apply qtbase patch
       run: |
-        cd ..\qt631\qtbase\
-        Invoke-WebRequest -Uri "https://github.com/eXhumer/qtbase-exmb/commit/689036d65a20178963b66916888ecdd37b3f3979.patch" -OutFile .\qtbase.patch
+        cd ..\qt632\qtbase\
+        Invoke-WebRequest -Uri "https://github.com/eXhumer/qtbase-exmb/commit/612cedbe3faa6fc368d335bf8a422bc20b11e48b.patch" -OutFile .\qtbase.patch
         git apply .\qtbase.patch
         rm .\qtbase.patch
-    - name: Get OpenSSL 1.1.1p
+    - name: Get OpenSSL 1.1.1q
       run: |
         git clone https://github.com/openssl/openssl.git ../openssl --origin=openssl
         cd ../openssl
-        git checkout OpenSSL_1_1_1p
+        git checkout OpenSSL_1_1_1q
     - name: Get NASM 2.15.05
       run: |
         $NASM_URL = "https://www.nasm.us/pub/nasm/releasebuilds/2.15.05/win64/nasm-2.15.05-win64.zip"
@@ -146,13 +146,13 @@ jobs:
         Import-Module $MSVC2022_DEVSHELL_PATH
         Enter-VsDevShell -VsInstallPath "$MSVC2022_INSTALL_PATH" -DevCmdArguments ($DEV_CMD_ARGS -join " ")
         cd ..\openssl\
-        mkdir ..\OpenSSL-1.1.1p\ && mkdir ..\OpenSSL-Dir\
+        mkdir ..\OpenSSL-1.1.1q\ && mkdir ..\OpenSSL-Dir\
         ${env:OPENSSL_DIR} = (Resolve-Path ..\OpenSSL-Dir).Path
-        ${env:OPENSSL_PREFIX} = (Resolve-Path ..\OpenSSL-1.1.1p).Path
+        ${env:OPENSSL_PREFIX} = (Resolve-Path ..\OpenSSL-1.1.1q).Path
         perl Configure --openssldir=${env:OPENSSL_DIR} --prefix=${env:OPENSSL_PREFIX} VC-WIN64A
         nmake
         nmake install
-    - name: Configure, Build & Install Qt 6.3.1 (MSVC2022-x64)
+    - name: Configure, Build & Install Qt 6.3.2 (MSVC2022-x64)
       run: |
         $VSWHERE_PATH = "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe"
         $DEV_CMD_ARGS = "-arch=amd64", "-host_arch=amd64", "-no_logo"
@@ -161,11 +161,11 @@ jobs:
         $MSVC2022_DEVSHELL_PATH = "$MSVC2022_INSTALL_PATH\Common7\Tools\Microsoft.VisualStudio.DevShell.dll"
         Import-Module $MSVC2022_DEVSHELL_PATH
         Enter-VsDevShell -VsInstallPath "$MSVC2022_INSTALL_PATH" -DevCmdArguments ($DEV_CMD_ARGS -join " ")
-        mkdir ..\qt631-static && cd ..\qt631-static
-        ..\qt631\configure.bat -prefix ..\Qt\6.3.1\msvc2022_64 -platform win32-msvc -release -static
+        mkdir ..\qt632-static && cd ..\qt632-static
+        ..\qt632\configure.bat -prefix ..\Qt\6.3.2\msvc2022_64 -platform win32-msvc -release -static
         cmake --build . --parallel
         cmake --install .
-    - name: Configure, Build & Install eXMB (Qt 6.3.1 | OpenSSL 1.1.1p | MSVC2022-x64)
+    - name: Configure, Build & Install eXMB (Qt 6.3.2 | OpenSSL 1.1.1q | MSVC2022-x64)
       env:
         REDDIT_CLIENT_ID: ${{ secrets.REDDIT_CLIENT_ID }}
       run: |
@@ -176,8 +176,8 @@ jobs:
         $MSVC2022_DEVSHELL_PATH = "$MSVC2022_INSTALL_PATH\Common7\Tools\Microsoft.VisualStudio.DevShell.dll"
         Import-Module $MSVC2022_DEVSHELL_PATH
         Enter-VsDevShell -VsInstallPath "$MSVC2022_INSTALL_PATH" -DevCmdArguments ($DEV_CMD_ARGS -join " ")
-        ${env:CMAKE_PREFIX_PATH} = (Resolve-Path ..\Qt\6.3.1\msvc2022_64).Path
-        cmake -B ..\eXMB-build -S . -DREDDIT_CLIENT_ID="${env:REDDIT_CLIENT_ID}" -DCMAKE_INSTALL_PREFIX="..\eXMB-ReleaseOut" -DCMAKE_SYSTEM_VERSION="10.0.22000.0" -DOPENSSL_ROOT_DIR="..\OpenSSL-1.1.1p"
+        ${env:CMAKE_PREFIX_PATH} = (Resolve-Path ..\Qt\6.3.2\msvc2022_64).Path
+        cmake -B ..\eXMB-build -S . -DREDDIT_CLIENT_ID="${env:REDDIT_CLIENT_ID}" -DCMAKE_INSTALL_PREFIX="..\eXMB-ReleaseOut" -DCMAKE_SYSTEM_VERSION="10.0.22000.0" -DOPENSSL_ROOT_DIR="..\OpenSSL-1.1.1q"
         cmake --build ..\eXMB-build --target ALL_BUILD --config Release --parallel
         cmake --install ..\eXMB-build
         ${env:EXMB_RELEASE_PATH} = (Resolve-Path ..\eXMB-ReleaseOut).Path
@@ -185,45 +185,45 @@ jobs:
     - name: Upload build artifact
       uses: actions/upload-artifact@v2
       with:
-        name: win32-qt631-msvc2022_64-static
+        name: win32-qt632-msvc2022_64-static
         path: ${{ env.EXMB_RELEASE_PATH }}
-  ubuntu-qt631-gcc_64-shared:
+  ubuntu-qt632-gcc_64-shared:
     runs-on: ubuntu-20.04
     steps:
     - name: Checkout project source code
       uses: actions/checkout@v2
     - name: Checkout project submodules
       run: git submodule update --init --recursive
-    - name: Install Qt 6.3.1 build requirements
+    - name: Install Qt 6.3.2 build requirements
       run: |
         sudo apt-get update && sudo apt-get install build-essential libclang-11-dev libclang-12-dev libgl1-mesa-dev libssl-dev libfontconfig1-dev libfreetype6-dev libx11-dev libx11-xcb-dev libxext-dev libxfixes-dev libxi-dev libxrender-dev libxcb1-dev libxcb-glx0-dev libxcb-keysyms1-dev libxcb-image0-dev libxcb-shm0-dev libxcb-icccm4-dev libxcb-sync-dev libxcb-xfixes0-dev libxcb-shape0-dev libxcb-randr0-dev libxcb-render-util0-dev libxcb-util-dev libxcb-xinerama0-dev libxcb-xkb-dev libxkbcommon-dev libxkbcommon-x11-dev ninja-build
-    - name: Get Qt 6.3.1 Source Code
+    - name: Get Qt 6.3.2 Source Code
       run: |
         cd ../
-        git clone git://code.qt.io/qt/qt5.git qt631 --branch=6.3.1
-        cd ./qt631
+        git clone git://code.qt.io/qt/qt5.git qt632 --branch=6.3.2
+        cd ./qt632
         perl init-repository --module-subset=qtbase,qtnetworkauth,qttools,qtwebsockets
         cd ./qtbase
-        wget "https://github.com/eXhumer/qtbase-exmb/commit/689036d65a20178963b66916888ecdd37b3f3979.patch"
-        git apply 689036d65a20178963b66916888ecdd37b3f3979.patch
-        rm 689036d65a20178963b66916888ecdd37b3f3979.patch
-    - name: Build Qt 6.3.1
+        wget "https://github.com/eXhumer/qtbase-exmb/commit/612cedbe3faa6fc368d335bf8a422bc20b11e48b.patch"
+        git apply 612cedbe3faa6fc368d335bf8a422bc20b11e48b.patch
+        rm 612cedbe3faa6fc368d335bf8a422bc20b11e48b.patch
+    - name: Build Qt 6.3.2
       run: |
-        mkdir ../qt631-shared
-        cd ../qt631-shared
-        ../qt631/configure -prefix ../Qt/6.3.1/gcc_64 -platform linux-g++ -release -shared
+        mkdir ../qt632-shared
+        cd ../qt632-shared
+        ../qt632/configure -prefix ../Qt/6.3.2/gcc_64 -platform linux-g++ -release -shared
         cmake --build . --parallel
         cmake --install .
     - name: Build eXMB
       env:
         REDDIT_CLIENT_ID: ${{ secrets.REDDIT_CLIENT_ID }}
       run: |
-        CMAKE_PREFIX_PATH=../Qt/6.3.1/gcc_64 cmake -B ../eXMB-build -S . -DREDDIT_CLIENT_ID="$REDDIT_CLIENT_ID" -DCMAKE_INSTALL_PREFIX="../eXMB-ReleaseOut" -DCMAKE_SYSTEM_VERSION="10.0.22000.0"
+        CMAKE_PREFIX_PATH=../Qt/6.3.2/gcc_64 cmake -B ../eXMB-build -S . -DREDDIT_CLIENT_ID="$REDDIT_CLIENT_ID" -DCMAKE_INSTALL_PREFIX="../eXMB-ReleaseOut" -DCMAKE_SYSTEM_VERSION="10.0.22000.0"
         cmake --build ../eXMB-build --target eXMB StreamableUploader --config Release
         cmake --install ../eXMB-build
         echo "EXMB_RELEASE_PATH=$(cd ../eXMB-ReleaseOut; pwd)" >> $GITHUB_ENV
     - name: Upload build artifact
       uses: actions/upload-artifact@v2
       with:
-        name: ubuntu-qt631-gcc_64-shared
+        name: ubuntu-qt632-gcc_64-shared
         path: ${{ env.EXMB_RELEASE_PATH }}
