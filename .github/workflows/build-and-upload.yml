@@ -27,18 +27,18 @@ jobs:
         rm .\qtbase.patch
     - name: Get OpenSSL 1.1.1r
       run: |
-        git clone https://github.com/openssl/openssl.git ../openssl --origin=openssl
-        cd ../openssl
+        git clone https://github.com/openssl/openssl.git ..\openssl
+        cd ..\openssl
         git checkout OpenSSL_1_1_1r
     - name: Get NASM 2.15.05
       run: |
         $NASM_URL = "https://www.nasm.us/pub/nasm/releasebuilds/2.15.05/win64/nasm-2.15.05-win64.zip"
         Invoke-WebRequest -Uri $NASM_URL -OutFile ../NASM.zip
-        cd ../
+        cd ..\
         Expand-Archive NASM.zip
     - name: Configure, Build & Install OpenSSL (NASM 2.15.05 | MSVC2022-x64)
       run: |
-        ${env:NASM_PATH} = (Resolve-Path ../NASM/nasm-2.15.05/).Path
+        ${env:NASM_PATH} = (Resolve-Path ..\NASM\nasm-2.15.05\).Path
         ${env:PATH} += ";${env:NASM_PATH}"
         $VSWHERE_PATH = "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe"
         $DEV_CMD_ARGS = "-arch=amd64", "-host_arch=amd64", "-no_logo"
@@ -96,8 +96,13 @@ jobs:
         & ..\Qt\6.4.0\msvc2022_64\bin\windeployqt.exe --release --no-translations --no-compiler-runtime ..\eXMB-ReleaseOut\bin\eXMB.exe
     - name: Deploy OpenSSL shared libraries with eXMB
       run: |
-        cp ..\OpenSSL-1.1.1r\bin\libcrypto-1_1-x64.dll ..\eXMB-ReleaseOut\bin
-        cp ..\OpenSSL-1.1.1r\bin\libssl-1_1-x64.dll ..\eXMB-ReleaseOut\bin
+        Copy-Item ..\OpenSSL-1.1.1r\bin\libcrypto-1_1-x64.dll ..\eXMB-ReleaseOut\bin
+        Copy-Item ..\OpenSSL-1.1.1r\bin\libssl-1_1-x64.dll ..\eXMB-ReleaseOut\bin
+    - name: Copy licenses to release path
+      run: |
+        Copy-Item .\COPYING.md ..\eXMB-ReleaseOut\eXMB-LICENSE.md
+        Copy-Item .\COPYING.md ..\eXMB-ReleaseOut\Qt-LICENSE.md
+        Copy-Item ..\openssl\LICENSE ..\eXMB-ReleaseOut\openssl-LICENSE
     - name: Upload build artifact
       uses: actions/upload-artifact@v2
       with:
@@ -125,18 +130,18 @@ jobs:
         rm .\qtbase.patch
     - name: Get OpenSSL 1.1.1r
       run: |
-        git clone https://github.com/openssl/openssl.git ../openssl --origin=openssl
-        cd ../openssl
+        git clone https://github.com/openssl/openssl.git ..\openssl
+        cd ..\openssl
         git checkout OpenSSL_1_1_1r
     - name: Get NASM 2.15.05
       run: |
         $NASM_URL = "https://www.nasm.us/pub/nasm/releasebuilds/2.15.05/win64/nasm-2.15.05-win64.zip"
         Invoke-WebRequest -Uri $NASM_URL -OutFile ../NASM.zip
-        cd ../
+        cd ..\
         Expand-Archive NASM.zip
     - name: Configure, Build & Install OpenSSL (NASM 2.15.05 | MSVC2022-x64)
       run: |
-        ${env:NASM_PATH} = (Resolve-Path ../NASM/nasm-2.15.05/).Path
+        ${env:NASM_PATH} = (Resolve-Path ..\NASM\nasm-2.15.05\).Path
         ${env:PATH} += ";${env:NASM_PATH}"
         $VSWHERE_PATH = "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe"
         $DEV_CMD_ARGS = "-arch=amd64", "-host_arch=amd64", "-no_logo"
@@ -182,6 +187,11 @@ jobs:
         cmake --install ..\eXMB-build
         ${env:EXMB_RELEASE_PATH} = (Resolve-Path ..\eXMB-ReleaseOut).Path
         echo "EXMB_RELEASE_PATH=${env:EXMB_RELEASE_PATH}" >> ${env:GITHUB_ENV}
+    - name: Copy license to release path
+      run: |
+        Copy-Item .\COPYING.md ..\eXMB-ReleaseOut\eXMB-LICENSE.md
+        Copy-Item .\COPYING.md ..\eXMB-ReleaseOut\Qt-LICENSE.md
+        Copy-Item ..\openssl\LICENSE ..\eXMB-ReleaseOut\openssl-LICENSE
     - name: Upload build artifact
       uses: actions/upload-artifact@v2
       with:
@@ -222,6 +232,11 @@ jobs:
         cmake --build ../eXMB-build --target eXMB StreamableUploader --config Release
         cmake --install ../eXMB-build
         echo "EXMB_RELEASE_PATH=$(cd ../eXMB-ReleaseOut; pwd)" >> $GITHUB_ENV
+    - name: Copy license to release path
+      run: |
+        cp ./COPYING.md ../eXMB-ReleaseOut/eXMB-LICENSE.md
+        cp ./COPYING.md ../eXMB-ReleaseOut/Qt-LICENSE.md
+        cp ../openssl/LICENSE ../eXMB-ReleaseOut/openssl-LICENSE
     - name: Upload build artifact
       uses: actions/upload-artifact@v2
       with:

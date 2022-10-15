@@ -144,12 +144,28 @@ void AppWindow::setupMenuBar() {
   connect(aboutAct, &QAction::triggered, this, [this](bool checked) {
     QMessageBox *aboutMsgBox = CreateMessageBox(
         QMessageBox::NoIcon, "About",
-        QString(APP_NAME) + " v" + QString(APP_VERSION) +
-            "\n\nStreamable Video Uploader.\n\nCopyright (C) 2022 - eXhumer",
+        QString(APP_NAME) + " " + QString(APP_VERSION) +
+            " - Streamable Video Uploader.<br />"
+            "Copyright (C) 2022  eXhumer<br />"
+            "<br />"
+            "This program is free software: you can redistribute it and/or "
+            "modify it under the terms of the GNU General Public License as "
+            "published by the Free Software Foundation, version 3 of the "
+            "License.<br />"
+            "<br />"
+            "This program is distributed in the hope that it will be useful, "
+            "but WITHOUT ANY WARRANTY; without even the implied warranty of "
+            "MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU "
+            "General Public License for more details.<br />"
+            "<br />"
+            "You should have received a copy of the GNU General Public License "
+            "along with this program.  If not, see "
+            "<a href='https://www.gnu.org/licenses/'>here</a>.<br />",
         QMessageBox::Ok, this);
 
     QIcon icon = aboutMsgBox->windowIcon();
     QSize size = icon.actualSize(QSize(64, 64));
+    aboutMsgBox->setTextFormat(Qt::TextFormat::RichText);
     aboutMsgBox->setIconPixmap(icon.pixmap(size));
     aboutMsgBox->exec();
     aboutMsgBox->deleteLater();
