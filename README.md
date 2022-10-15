@@ -15,7 +15,7 @@ Reddit media poster via external media hosting platforms. The video file is uplo
 * Streamja
 
 ## Build Requirements
-The application requires Qt6 (Tested working with Qt v6.3.0) / CMake (v3.23.1).
+The application was tested with Qt 6.4.0 & CMake 3.24.1.
 
 ## Licensing
-This project is licensed under OSI Approved [GNU GPLv3 **ONLY**](https://github.com/eXhumer/eXMB/blob/qt6-cmake/LICENSE.md).
+This project is licensed under OSI Approved [GNU GPLv3 **ONLY**](./COPYING.md).

@@ -26,7 +26,7 @@ int main(int argc, char **argv) {
   app.setApplicationName(APP_NAME);
   app.setOrganizationName(APP_ORGANIZATION);
   app.setApplicationVersion(APP_VERSION);
-  AppWindow window(APP_REDDIT_CLIENT_ID);
-  window.show();
+  AppWindow *window = new AppWindow(APP_REDDIT_CLIENT_ID);
+  window->show();
   return app.exec();
 }
