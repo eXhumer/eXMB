@@ -236,7 +236,6 @@ jobs:
       run: |
         cp ./COPYING.md ../eXMB-ReleaseOut/eXMB-LICENSE.md
         cp ./COPYING.md ../eXMB-ReleaseOut/Qt-LICENSE.md
-        cp ../openssl/LICENSE ../eXMB-ReleaseOut/openssl-LICENSE
     - name: Upload build artifact
       uses: actions/upload-artifact@v2
       with:
