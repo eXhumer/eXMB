@@ -9,7 +9,7 @@ jobs:
     runs-on: windows-2022
     steps:
     - name: Checkout project source code
-      uses: actions/checkout@v2
+      uses: actions/checkout@v3
     - name: Checkout project submodules
       run: git submodule update --init --recursive
     - name: Get Qt 6.4.0
@@ -104,7 +104,7 @@ jobs:
         Copy-Item .\COPYING.md ..\eXMB-ReleaseOut\Qt-LICENSE.md
         Copy-Item ..\openssl\LICENSE ..\eXMB-ReleaseOut\openssl-LICENSE
     - name: Upload build artifact
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v3
       with:
         name: win32-qt640-msvc2022_64-shared
         path: ${{ env.EXMB_RELEASE_PATH }}
@@ -112,7 +112,7 @@ jobs:
     runs-on: windows-2022
     steps:
     - name: Checkout project source code
-      uses: actions/checkout@v2
+      uses: actions/checkout@v3
     - name: Checkout project submodules
       run: git submodule update --init --recursive
     - name: Get Qt 6.4.0
@@ -193,7 +193,7 @@ jobs:
         Copy-Item .\COPYING.md ..\eXMB-ReleaseOut\Qt-LICENSE.md
         Copy-Item ..\openssl\LICENSE ..\eXMB-ReleaseOut\openssl-LICENSE
     - name: Upload build artifact
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v3
       with:
         name: win32-qt640-msvc2022_64-static
         path: ${{ env.EXMB_RELEASE_PATH }}
@@ -201,7 +201,7 @@ jobs:
     runs-on: ubuntu-20.04
     steps:
     - name: Checkout project source code
-      uses: actions/checkout@v2
+      uses: actions/checkout@v3
     - name: Checkout project submodules
       run: git submodule update --init --recursive
     - name: Install Qt 6.4.0 build requirements
@@ -237,7 +237,7 @@ jobs:
         cp ./COPYING.md ../eXMB-ReleaseOut/eXMB-LICENSE.md
         cp ./COPYING.md ../eXMB-ReleaseOut/Qt-LICENSE.md
     - name: Upload build artifact
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v3
       with:
         name: ubuntu-qt640-gcc_64-shared
         path: ${{ env.EXMB_RELEASE_PATH }}
