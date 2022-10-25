@@ -124,6 +124,7 @@ void AppWindow::setupCentralWidget() {
   m_flairLE->setPlaceholderText("Post Flair ID (Optional)");
 
   postHostLayout->addWidget(new QLabel("Video Host"), 0, Qt::AlignHCenter);
+  postHostLayout->addWidget(m_dubzRB);
   postHostLayout->addWidget(m_imgurRB);
   postHostLayout->addWidget(m_jslRB);
   postHostLayout->addWidget(m_redRB);
@@ -312,6 +313,7 @@ void AppWindow::setupWidgets() {
   m_authBtn = new QPushButton("Authorize");
   m_revokeBtn = new QPushButton("Revoke");
   m_videoSelectBtn = new QPushButton("Select Video File and Upload");
+  m_dubzRB = new QRadioButton("Dubz");
   m_imgurRB = new QRadioButton("Imgur");
   m_jslRB = new QRadioButton("JustStreamLive");
   m_redRB = new QRadioButton("Reddit");
@@ -334,6 +336,7 @@ void AppWindow::enableWidgets() {
   m_authBtn->setEnabled(true);
   m_revokeBtn->setEnabled(true);
   m_videoSelectBtn->setEnabled(true);
+  m_dubzRB->setEnabled(true);
   m_imgurRB->setEnabled(true);
   m_jslRB->setEnabled(true);
   m_redRB->setEnabled(true);
@@ -356,6 +359,7 @@ void AppWindow::disableWidgets() {
   m_authBtn->setDisabled(true);
   m_revokeBtn->setDisabled(true);
   m_videoSelectBtn->setDisabled(true);
+  m_dubzRB->setDisabled(true);
   m_imgurRB->setDisabled(true);
   m_jslRB->setDisabled(true);
   m_redRB->setDisabled(true);
@@ -442,9 +446,10 @@ void AppWindow::onVideoFileSelectAndUpload() {
     return;
   }
 
-  bool hostSelected = m_imgurRB->isChecked() || m_jslRB->isChecked() ||
-                      m_redRB->isChecked() || m_sabRB->isChecked() ||
-                      m_sffRB->isChecked() || m_sjaRB->isChecked();
+  bool hostSelected = m_dubzRB->isChecked() || m_imgurRB->isChecked() ||
+                      m_jslRB->isChecked() || m_redRB->isChecked() ||
+                      m_sabRB->isChecked() || m_sffRB->isChecked() ||
+                      m_sjaRB->isChecked();
 
   if (!hostSelected) {
     QMessageBox *msgBox = CreateMessageBox(
@@ -465,7 +470,8 @@ void AppWindow::onVideoFileSelectAndUpload() {
            m_sabRB->isChecked())
     filter = "Supported Video Files (*.mkv *.mp4)";
 
-  else if (m_sffRB->isChecked() || m_sjaRB->isChecked())
+  else if (m_dubzRB->isChecked() || m_sffRB->isChecked() ||
+           m_sjaRB->isChecked())
     filter = "Supported Video Files (*.mp4)";
 
   QString videoFilePath = QFileDialog::getOpenFileName(
@@ -477,8 +483,8 @@ void AppWindow::onVideoFileSelectAndUpload() {
   QFile *videoFile = new QFile(videoFilePath);
   QObject *videoCtx = new QObject;
 
-  if (m_imgurRB->isChecked() || m_jslRB->isChecked() || m_sabRB->isChecked() ||
-      m_sffRB->isChecked() || m_sjaRB->isChecked()) {
+  if (m_dubzRB->isChecked() || m_imgurRB->isChecked() || m_jslRB->isChecked() ||
+      m_sabRB->isChecked() || m_sffRB->isChecked() || m_sjaRB->isChecked()) {
     connect(
         m_media, &eXVHP::Service::MediaService::mediaUploadProgress, videoCtx,
         [this, videoFile](QFile *vidFile, qint64 bytesSent, qint64 bytesTotal) {
@@ -544,6 +550,9 @@ void AppWindow::onVideoFileSelectAndUpload() {
                 videoCtx->deleteLater();
               }
             });
+
+    if (m_dubzRB->isChecked())
+      m_media->uploadDubz(videoFile, m_titleLE->text());
 
     if (m_imgurRB->isChecked())
       m_media->uploadImgur(videoFile, m_titleLE->text());

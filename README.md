@@ -7,6 +7,7 @@ Reddit media poster via external media hosting platforms. The video file is uplo
 <img src="https://user-images.githubusercontent.com/62310242/149682770-c546f5e5-28a1-4f04-8127-d6b3a4ca8c23.png" width="512">
 
 ## Supported Media Hosting Platforms
+* Dubz
 * Imgur
 * JustStreamLive
 * Reddit
