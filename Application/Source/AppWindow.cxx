@@ -503,7 +503,7 @@ void AppWindow::onVideoFileSelectAndUpload() {
                     [this, videoCtx, videoLink](const QString &postUrl,
                                                 const QString &redditUrl) {
                       if (postUrl == videoLink) {
-                        QMessageBox *videoLinkMsgBox = new QMessageBox(
+                        QMessageBox *videoLinkMsgBox = CreateMessageBox(
                             QMessageBox::NoIcon, "Video Posted Successfully!",
                             "Posted <a href=\"" + postUrl +
                                 "\">Video</a> to <a href=\"" + redditUrl +
